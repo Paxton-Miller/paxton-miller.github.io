@@ -1,0 +1,363 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.7;
+    color: inherit;
+    background: transparent;
+    overflow-x: hidden;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: transparent;
+}
+
+.hero {
+    text-align: center;
+    padding: 4rem 0;
+    position: relative;
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, currentColor, transparent);
+    opacity: 0.3;
+}
+
+.avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    margin: 0 auto 2rem;
+    border: 3px solid;
+    border-color: currentColor;
+    opacity: 0.8;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.avatar::before {
+    content: '👨‍💻';
+    position: relative;
+    z-index: 1;
+}
+
+.avatar:hover {
+    transform: scale(1.05);
+    border-color: currentColor;
+    opacity: 1;
+}
+
+.hero h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, currentColor, currentColor);
+    -webkit-background-clip: text;
+    background-clip: text;
+    opacity: 0.9;
+}
+
+.hero .subtitle {
+    font-size: 1.2rem;
+    opacity: 0.7;
+    margin-bottom: 2rem;
+    font-weight: 300;
+}
+
+.hero .motto {
+    font-size: 1rem;
+    opacity: 0.6;
+    font-style: italic;
+    position: relative;
+}
+
+.hero .motto::before,
+.hero .motto::after {
+    content: '"';
+    font-size: 1.5rem;
+    opacity: 0.4;
+}
+
+.section {
+    margin: 4rem 0;
+    padding: 2rem 0;
+    position: relative;
+}
+
+.section-title {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    text-align: center;
+    position: relative;
+    opacity: 0.9;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 2px;
+    background: currentColor;
+    opacity: 0.3;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.card {
+    padding: 2rem;
+    border-radius: 12px;
+    border: 1px solid;
+    border-color: currentColor;
+    border-opacity: 0.1;
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, 
+        rgba(99, 102, 241, 0.5),
+        rgba(168, 85, 247, 0.5),
+        rgba(236, 72, 153, 0.5)
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    border-color: currentColor;
+    border-opacity: 0.2;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.card:hover::before {
+    opacity: 1;
+}
+
+.card-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.card h3 {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    opacity: 0.9;
+}
+
+.card p {
+    opacity: 0.7;
+    line-height: 1.6;
+}
+
+.tech-stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.tech-tag {
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    border: 1px solid;
+    border-color: currentColor;
+    border-opacity: 0.2;
+    background: rgba(255, 255, 255, 0.03);
+    opacity: 0.8;
+    transition: all 0.3s ease;
+}
+
+.tech-tag:hover {
+    opacity: 1;
+    transform: scale(1.05);
+    border-opacity: 0.4;
+}
+
+.interests {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.interest-item {
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid;
+    border-color: currentColor;
+    border-opacity: 0.1;
+    background: rgba(255, 255, 255, 0.01);
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.interest-item:hover {
+    border-opacity: 0.2;
+    background: rgba(255, 255, 255, 0.03);
+    transform: translateY(-2px);
+}
+
+.interest-emoji {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.philosophy {
+    text-align: center;
+    font-size: 1.1rem;
+    line-height: 1.8;
+    opacity: 0.8;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+    border-radius: 12px;
+    border: 1px solid;
+    border-color: currentColor;
+    border-opacity: 0.1;
+    background: rgba(255, 255, 255, 0.02);
+    position: relative;
+}
+
+.philosophy::before {
+    content: '💫';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: inherit;
+    padding: 0 1rem;
+    font-size: 1.5rem;
+}
+
+.contact-links {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 3rem;
+    flex-wrap: wrap;
+}
+
+.contact-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.5rem;
+    border-radius: 25px;
+    border: 1px solid;
+    border-color: currentColor;
+    border-opacity: 0.2;
+    color: inherit;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.contact-link:hover {
+    border-opacity: 0.4;
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateY(-2px);
+}
+
+.terminal {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    background: rgba(0, 0, 0, 0.05);
+    border: 1px solid;
+    border-color: currentColor;
+    border-opacity: 0.1;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 2rem 0;
+    position: relative;
+}
+
+.terminal::before {
+    content: '$ whoami';
+    display: block;
+    opacity: 0.6;
+    margin-bottom: 0.5rem;
+}
+
+.terminal-content {
+    opacity: 0.8;
+    line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+    
+    .hero h1 {
+        font-size: 2.5rem;
+    }
+    
+    .grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .contact-links {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
+/* 动画效果 */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card, .interest-item, .philosophy {
+    animation: fadeInUp 0.6s ease forwards;
+}
+
+.card:nth-child(2) { animation-delay: 0.1s; }
+.card:nth-child(3) { animation-delay: 0.2s; }
+.card:nth-child(4) { animation-delay: 0.3s; }
