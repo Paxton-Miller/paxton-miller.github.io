@@ -1,0 +1,679 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Lingkai Shi">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="Vue3 带来最大的革新莫过于选项式API (Composition API), 其中一大特性就是组合式函数。在 Vue 生态中，composables 一般翻译成 “组合式函数” 或 “可组合函数”, 意思是把一段逻辑（通常是响应式状态、计算属性、侦听器等）封装成一个独立的函数，这个函数可以在多个组件中复用, 也可以用于解耦臃肿的业务逻辑。 作用：逻辑复用、代码组织更清晰，不依赖组件上下文 一个">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Vue Composables - 组合式函数的应用">
+<meta property="og:url" content="http://example.com/2025/08/09/Vue-Composables-%E7%BB%84%E5%90%88%E5%BC%8F%E5%87%BD%E6%95%B0%E7%9A%84%E5%BA%94%E7%94%A8/index.html">
+<meta property="og:site_name" content="码上自由的博客">
+<meta property="og:description" content="Vue3 带来最大的革新莫过于选项式API (Composition API), 其中一大特性就是组合式函数。在 Vue 生态中，composables 一般翻译成 “组合式函数” 或 “可组合函数”, 意思是把一段逻辑（通常是响应式状态、计算属性、侦听器等）封装成一个独立的函数，这个函数可以在多个组件中复用, 也可以用于解耦臃肿的业务逻辑。 作用：逻辑复用、代码组织更清晰，不依赖组件上下文 一个">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-08-09T09:14:12.000Z">
+<meta property="article:modified_time" content="2025-08-09T10:46:24.050Z">
+<meta property="article:author" content="Lingkai Shi">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>Vue Composables - 组合式函数的应用 - 码上自由的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="/css/demo.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Hello World, Hello Life</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span> </span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span> </span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span> </span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span> </span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span> </span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Vue Composables - 组合式函数的应用"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-08-09 17:14" pubdate>
+          2025年8月9日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          1.3k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          11 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Vue Composables - 组合式函数的应用</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>Vue3 带来最大的革新莫过于选项式API (<code>Composition API</code>), 其中一大特性就是<code>组合式函数</code>。在 Vue 生态中，composables 一般翻译成 “组合式函数” 或 “可组合函数”, 意思是把一段逻辑（通常是响应式状态、计算属性、侦听器等）封装成一个独立的函数，这个函数可以在多个组件中复用, 也可以用于解耦臃肿的业务逻辑。</p>
+<p><strong>作用：逻辑复用、代码组织更清晰，不依赖组件上下文</strong></p>
+<h2 id="一个简单的组合式函数样例"><a href="#一个简单的组合式函数样例" class="headerlink" title="一个简单的组合式函数样例"></a>一个简单的组合式函数样例</h2><h3 id="创建-useGrid-ts-文件"><a href="#创建-useGrid-ts-文件" class="headerlink" title="创建 useGrid.ts 文件"></a>创建 useGrid.ts 文件</h3><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs typescript"><span class="hljs-keyword">import</span> &#123; computed, ref &#125; <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;vue&quot;</span><br><br><span class="hljs-keyword">type</span> <span class="hljs-title class_">Grid</span> = &#123;<br>    <span class="hljs-attr">columnId</span>: <span class="hljs-built_in">number</span>,<br>    <span class="hljs-attr">rowId</span>: <span class="hljs-built_in">number</span>,<br>    <span class="hljs-attr">resolution</span>: <span class="hljs-built_in">number</span><br>&#125;<br><br><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title function_">useGrid</span> = (<span class="hljs-params"></span>) =&gt; &#123;<br>    <span class="hljs-keyword">const</span> columnId = ref&lt;<span class="hljs-built_in">number</span>&gt;()<br>    <span class="hljs-keyword">const</span> rowId = ref&lt;<span class="hljs-built_in">number</span>&gt;()<br>    <span class="hljs-keyword">const</span> resolution = ref&lt;<span class="hljs-built_in">number</span>&gt;()<br>    <span class="hljs-keyword">const</span> selectedGrid = ref&lt;<span class="hljs-title class_">Grid</span>&gt;()<br><br>    <span class="hljs-keyword">const</span> <span class="hljs-title function_">getAllGrid</span> = (<span class="hljs-params"></span>) =&gt; &#123;<br>        <span class="hljs-comment">// 在这里封装具体的函数逻辑</span><br>        ...<br>    &#125;<br><br>    <span class="hljs-keyword">return</span> &#123;<br>        selectedGrid,<br>        getAllGrid<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="在你的代码中应用"><a href="#在你的代码中应用" class="headerlink" title="在你的代码中应用"></a>在你的代码中应用</h3><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">template</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span><br>        一个简单的组合式函数样例🚀<br>        <span class="hljs-tag">&lt;<span class="hljs-name">span</span>&gt;</span>当前选中的格网：&#123;&#123; selectedGrid &#125;&#125;<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">template</span>&gt;</span><br><br><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">setup</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">&quot;ts&quot;</span>&gt;</span><span class="language-javascript"></span><br><span class="language-javascript"><span class="hljs-keyword">import</span> &#123; useGrid &#125; <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./useGrid.ts&quot;</span></span><br><span class="language-javascript"><span class="hljs-keyword">const</span> &#123; selectedGrid, getAllGrid &#125; = <span class="hljs-title function_">useGrid</span>() <span class="hljs-comment">// 记住这种写法！对象解耦</span></span><br><span class="language-javascript"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<h3 id="等同于："><a href="#等同于：" class="headerlink" title="等同于："></a>等同于：</h3><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">template</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span><br>        一个简单的非组合式函数样例<br>        <span class="hljs-tag">&lt;<span class="hljs-name">span</span>&gt;</span>当前选中的格网：&#123;&#123; selectedGrid &#125;&#125;<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">template</span>&gt;</span><br><br><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">setup</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">&quot;ts&quot;</span>&gt;</span><span class="language-javascript"></span><br><span class="language-javascript"><span class="hljs-keyword">import</span> &#123; computed, ref &#125; <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;vue&quot;</span></span><br><span class="language-javascript"></span><br><span class="language-javascript">type <span class="hljs-title class_">Grid</span> = &#123;</span><br><span class="language-javascript">    <span class="hljs-attr">columnId</span>: number,</span><br><span class="language-javascript">    <span class="hljs-attr">rowId</span>: number,</span><br><span class="language-javascript">    <span class="hljs-attr">resolution</span>: number</span><br><span class="language-javascript">&#125;</span><br><span class="language-javascript"></span><br><span class="language-javascript"><span class="hljs-keyword">const</span> columnId = ref&lt;number&gt;()</span><br><span class="language-javascript"><span class="hljs-keyword">const</span> rowId = ref&lt;number&gt;()</span><br><span class="language-javascript"><span class="hljs-keyword">const</span> resolution = ref&lt;number&gt;()</span><br><span class="language-javascript"><span class="hljs-keyword">const</span> selectedGrid = ref&lt;<span class="hljs-title class_">Grid</span>&gt;()</span><br><span class="language-javascript"></span><br><span class="language-javascript"><span class="hljs-keyword">const</span> <span class="hljs-title function_">getAllGrid</span> = (<span class="hljs-params"></span>) =&gt; &#123;</span><br><span class="language-javascript">    <span class="hljs-comment">// 在这里封装具体的函数逻辑</span></span><br><span class="language-javascript">    ...</span><br><span class="language-javascript">&#125;</span><br><span class="language-javascript"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<h2 id="组合式函数的好处"><a href="#组合式函数的好处" class="headerlink" title="组合式函数的好处"></a>组合式函数的好处</h2><p>大家可以发现，组合式函数能够将你的业务逻辑从原本臃肿的代码中抽象解放出来！以便于逻辑复用，同时代码组织更加清晰，不依赖组件上下文</p>
+<h2 id="组合式函数的“陷阱”"><a href="#组合式函数的“陷阱”" class="headerlink" title="组合式函数的“陷阱”"></a>组合式函数的“陷阱”</h2><h3 id="选项式-API-作用域范围混淆——案例1"><a href="#选项式-API-作用域范围混淆——案例1" class="headerlink" title="选项式 API 作用域范围混淆——案例1"></a>选项式 API 作用域范围混淆——案例1</h3><p>大家可以思考一下以下两种写法有什么不同？</p>
+<ul>
+<li>写法1</li>
+</ul>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs typescript"><span class="hljs-comment">// useGrid.ts</span><br><span class="hljs-keyword">import</span> &#123; computed, ref &#125; <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;vue&quot;</span><br><br><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title function_">useGrid</span> = (<span class="hljs-params"></span>) =&gt; &#123;<br>    <span class="hljs-comment">// 把响应式变量封装入组合式函数内部</span><br>    <span class="hljs-keyword">const</span> columnId = ref&lt;<span class="hljs-built_in">number</span>&gt;(<span class="hljs-number">0</span>)<br><br>    <span class="hljs-keyword">return</span> &#123;<br>        columnId<br>    &#125;<br>&#125;<br><br><span class="hljs-comment">// test.ts</span><br><span class="hljs-keyword">import</span> &#123; useGrid &#125; <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./useGrid.ts&quot;</span><br><span class="hljs-keyword">const</span> &#123; <span class="hljs-attr">columnId</span>: columnIdA &#125; = <span class="hljs-title function_">useGrid</span>() <span class="hljs-comment">// :相当于以columnIdA的变量名引入columnId</span><br><span class="hljs-keyword">const</span> &#123; <span class="hljs-attr">columnId</span>: columnIdB &#125; = <span class="hljs-title function_">useGrid</span>()<br><br>columnIdA.<span class="hljs-property">value</span> ++<br>columnIdB.<span class="hljs-property">value</span> ++<br><br><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(columnIdA.<span class="hljs-property">value</span>)<br><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(columnIdB.<span class="hljs-property">value</span>)<br></code></pre></td></tr></table></figure>
+<p>输出结果</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">1<br>1<br></code></pre></td></tr></table></figure>
+<ul>
+<li>写法2</li>
+</ul>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs typescript"><span class="hljs-comment">// useGrid.ts</span><br><span class="hljs-keyword">import</span> &#123; computed, ref &#125; <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;vue&quot;</span><br><br><span class="hljs-keyword">const</span> columnId = ref&lt;<span class="hljs-built_in">number</span>&gt;(<span class="hljs-number">0</span>)<br><br><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title function_">useGrid</span> = (<span class="hljs-params"></span>) =&gt; &#123;<br>    <span class="hljs-keyword">return</span> &#123;<br>        columId<br>    &#125;<br>&#125;<br><br><span class="hljs-comment">// test.ts</span><br><span class="hljs-keyword">import</span> &#123; useGrid &#125; <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./useGrid.ts&quot;</span><br><span class="hljs-keyword">const</span> &#123; <span class="hljs-attr">columnId</span>: columnIdA &#125; = <span class="hljs-title function_">useGrid</span>() <span class="hljs-comment">// :相当于以columnIdA的变量名引入columnId</span><br><span class="hljs-keyword">const</span> &#123; <span class="hljs-attr">columnId</span>: columnIdB &#125; = <span class="hljs-title function_">useGrid</span>()<br><br>columnIdA.<span class="hljs-property">value</span> ++<br>columnIdB.<span class="hljs-property">value</span> ++<br><br><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(columnIdA.<span class="hljs-property">value</span>)<br><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(columnIdB.<span class="hljs-property">value</span>)<br></code></pre></td></tr></table></figure>
+<p>输出结果</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">1<br>2<br></code></pre></td></tr></table></figure>
+<p>为什么会造成这种差异呢？</p>
+<p>因为写法1把columnId这个响应式变量作为了组合函数封装的一部分，而写法2则把columnId作为了全局变量。在写法1的情况下，利用useGrid声明的两个响应式变量是双胞胎兄弟，它们本质上是不同的个体！而写法2虽然也声明了两个响应式变量，但本质上两个响应式变量指向的是同一个变量。</p>
+<p>这两种做法各有什么实际用处呢？</p>
+<p>写法1更适用于“逻辑复用”，在不同的地方声明useGrid，也即在不同的业务场景应用组合式函数，他们需要的是独立的响应式变量，不需要共享给其他组件。<br>而写法2更适用于“共享”，在不同的地方声明useGrid，它们可以拿到同一份响应式变量，需要的是能在不同的业务场景中共享一份数据。</p>
+<h3 id="选项式API作用域范围混淆——案例2"><a href="#选项式API作用域范围混淆——案例2" class="headerlink" title="选项式API作用域范围混淆——案例2"></a>选项式API作用域范围混淆——案例2</h3><p>前情提要：useI18n是一个只能作用于选项式API范围内的组合式函数</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs typescript"><span class="hljs-comment">// useA.ts</span><br><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title function_">useA</span> = (<span class="hljs-params"></span>) =&gt; &#123;<br>    <span class="hljs-keyword">const</span> &#123; t &#125; = <span class="hljs-title function_">useI18n</span>()<br>    ...<br><br>    <span class="hljs-keyword">return</span> &#123;<br>        ...<br>    &#125;<br>&#125;<br><br><span class="hljs-comment">//useB.ts</span><br><span class="hljs-keyword">import</span> &#123; useA &#125; <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./useA.ts&#x27;</span><br><span class="hljs-keyword">const</span> &#123; ... &#125; = <span class="hljs-title function_">useA</span>()<br><br><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title function_">useB</span> = (<span class="hljs-params"></span>) =&gt; &#123;<br>    ...<br>    <span class="hljs-keyword">return</span> &#123;<br>        ...<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>vue组件测试</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">template</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">template</span>&gt;</span><br><br><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">setup</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">&quot;ts&quot;</span>&gt;</span><span class="language-javascript"></span><br><span class="language-javascript"><span class="hljs-keyword">import</span> &#123; useB &#125; <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./useB.ts&#x27;</span></span><br><span class="language-javascript"><span class="hljs-keyword">const</span> &#123; ... &#125; = <span class="hljs-title function_">useB</span>()</span><br><span class="language-javascript"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<p>这是另一种作用域混淆错误，因为useA中useI18n只能在选项式API内声明，而useB中却在组合式函数外部声明useA，这本质上脱离了选项式API的作用域，故vue组件就会报错useI18n必须在选项式API内部声明。</p>
+<h3 id="注意规避循环依赖"><a href="#注意规避循环依赖" class="headerlink" title="注意规避循环依赖"></a>注意规避循环依赖</h3><p>有的时候我们喜欢混用各个组合式函数，组合式函数之间可能存在相互引用的变量，就会造成循环依赖，故在设计时就要将各个模块解耦开，另外推荐一种笔者推荐的写法，可以有效避免循环依赖：</p>
+<h3 id="笔者推荐的写法"><a href="#笔者推荐的写法" class="headerlink" title="笔者推荐的写法"></a>笔者推荐的写法</h3><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs typescript"><span class="hljs-comment">// 创建 shared.ts</span><br><span class="hljs-keyword">import</span> &#123; ref &#125; <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vue&#x27;</span><br><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> commonVar = ref&lt;<span class="hljs-built_in">number</span>&gt;(<span class="hljs-number">0</span>)<br><br><span class="hljs-comment">// useA.ts</span><br><span class="hljs-keyword">import</span> &#123; commonVar &#125; <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./shared.ts&#x27;</span><br>... <span class="hljs-comment">// 使用commonVar</span><br><span class="hljs-comment">// useB.ts</span><br><span class="hljs-keyword">import</span> &#123; commonVar &#125; <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./shared.ts&#x27;</span><br>... <span class="hljs-comment">// 使用commonVar</span><br></code></pre></td></tr></table></figure>
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Vue Composables - 组合式函数的应用</div>
+      <div>http://example.com/2025/08/09/Vue-Composables-组合式函数的应用/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Lingkai Shi</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年8月9日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/08/03/hello-world/" title="Hello World">
+                        <span class="hidden-mobile">Hello World</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  
+  
+    <article id="comments" lazyload>
+      
+  <div id="valine"></div>
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#valine', function() {
+      Fluid.utils.createScript('https://lib.baomitu.com/valine/1.5.1/Valine.min.js', function() {
+        var options = Object.assign(
+          {"appId":"UI6r4jx4Fi5JCbcprPm3mTAh-MdYXbMMI","appKey":"wdCPROJ2afmmDwNeZCaOUodT","path":"window.location.pathname","placeholder":"来都来了，不留下点什么吗？","avatar":"retro","meta":["nick","mail","link"],"requiredFields":[],"pageSize":10,"lang":"zh-CN","highlight":true,"recordIP":false,"serverURLs":"https://ui6r4jx4.api.lncldglobal.com","emojiCDN":null,"emojiMaps":null,"enableQQ":true},
+          {
+            el: "#valine",
+            path: window.location.pathname
+          }
+        )
+        new Valine(options);
+        Fluid.utils.waitElementVisible('#valine .vcontent', () => {
+          var imgSelector = '#valine .vcontent img:not(.vemoji)';
+          Fluid.plugins.imageCaption(imgSelector);
+          Fluid.plugins.fancyBox(imgSelector);
+        })
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+    </article>
+  
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <i class="iconfont icon-brush"></i> <span>To Freedom, With Ink.</span> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+  <script type="text/javascript"
+  color="220,220,220" opacity='0.7' zIndex="-2" count="200" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js">
+  </script>
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
