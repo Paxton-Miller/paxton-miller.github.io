@@ -1,0 +1,782 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Lingkai Shi">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="MinIO 分布式部署（Docker）📋 目录 为什么选择分布式部署？ 部署前准备 MinIO 分布式容器化部署 Nginx 负载均衡配置 参考资料  为什么选择分布式部署？MinIO 单体应用并不能发挥 MinIO 自带分布式存储的优势：  ✅ 数据容灾：多节点备份，防止数据丢失 ✅ 负载均衡：分散请求压力，提高性能 ✅ 高可用性：避免单点故障，确保服务稳定运行   ⚠️ 注意：单节点部署难免">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MinIO 分布式部署（Docker）">
+<meta property="og:url" content="http://example.com/2025/09/05/MinIO-%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%EF%BC%88Docker%EF%BC%89/index.html">
+<meta property="og:site_name" content="码上自由的博客">
+<meta property="og:description" content="MinIO 分布式部署（Docker）📋 目录 为什么选择分布式部署？ 部署前准备 MinIO 分布式容器化部署 Nginx 负载均衡配置 参考资料  为什么选择分布式部署？MinIO 单体应用并不能发挥 MinIO 自带分布式存储的优势：  ✅ 数据容灾：多节点备份，防止数据丢失 ✅ 负载均衡：分散请求压力，提高性能 ✅ 高可用性：避免单点故障，确保服务稳定运行   ⚠️ 注意：单节点部署难免">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-09-05T02:40:39.000Z">
+<meta property="article:modified_time" content="2025-09-05T02:44:26.509Z">
+<meta property="article:author" content="Lingkai Shi">
+<meta property="article:tag" content="MinIO Docker 分布式">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>MinIO 分布式部署（Docker） - 码上自由的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="/css/demo.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Hello World, Hello Life</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span> </span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span> </span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span> </span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span> </span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span> </span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="MinIO 分布式部署（Docker）"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-09-05 10:40" pubdate>
+          2025年9月5日 上午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          848 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          8 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">MinIO 分布式部署（Docker）</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="MinIO-分布式部署（Docker）"><a href="#MinIO-分布式部署（Docker）" class="headerlink" title="MinIO 分布式部署（Docker）"></a>MinIO 分布式部署（Docker）</h1><h2 id="📋-目录"><a href="#📋-目录" class="headerlink" title="📋 目录"></a>📋 目录</h2><ul>
+<li><a href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%80%89%E6%8B%A9%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2">为什么选择分布式部署？</a></li>
+<li><a href="#%E9%83%A8%E7%BD%B2%E5%89%8D%E5%87%86%E5%A4%87">部署前准备</a></li>
+<li><a href="#minio-%E5%88%86%E5%B8%83%E5%BC%8F%E5%AE%B9%E5%99%A8%E5%8C%96%E9%83%A8%E7%BD%B2">MinIO 分布式容器化部署</a></li>
+<li><a href="#nginx-%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E9%85%8D%E7%BD%AE">Nginx 负载均衡配置</a></li>
+<li><a href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99">参考资料</a></li>
+</ul>
+<h2 id="为什么选择分布式部署？"><a href="#为什么选择分布式部署？" class="headerlink" title="为什么选择分布式部署？"></a>为什么选择分布式部署？</h2><p>MinIO 单体应用并不能发挥 MinIO 自带分布式存储的优势：</p>
+<ul>
+<li>✅ <strong>数据容灾</strong>：多节点备份，防止数据丢失</li>
+<li>✅ <strong>负载均衡</strong>：分散请求压力，提高性能</li>
+<li>✅ <strong>高可用性</strong>：避免单点故障，确保服务稳定运行</li>
+</ul>
+<blockquote>
+<p>⚠️ <strong>注意</strong>：单节点部署难免会出现单点故障，无法做到服务的高可用</p>
+</blockquote>
+<h2 id="部署前准备"><a href="#部署前准备" class="headerlink" title="部署前准备"></a>部署前准备</h2><h3 id="系统要求"><a href="#系统要求" class="headerlink" title="系统要求"></a>系统要求</h3><ul>
+<li>MinIO 官方建议采用 <strong>Kubernetes</strong> 部署</li>
+<li>确保所有节点的 <strong>MinIO 版本一致</strong></li>
+<li>建议使用 4 个或更多节点以获得最佳性能</li>
+</ul>
+<h3 id="网络配置"><a href="#网络配置" class="headerlink" title="网络配置"></a>网络配置</h3><h4 id="1-获取节点-IP-地址"><a href="#1-获取节点-IP-地址" class="headerlink" title="1. 获取节点 IP 地址"></a>1. 获取节点 IP 地址</h4><p>在每个节点上执行以下命令获取内网 IP：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">ip addr<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>💡 <strong>提示</strong>：阿里云服务器请勿采用公网 IP，使用内网 IP 更安全且性能更好</p>
+</blockquote>
+<h4 id="2-配置主机名解析"><a href="#2-配置主机名解析" class="headerlink" title="2. 配置主机名解析"></a>2. 配置主机名解析</h4><p>在每个节点的 <code>/etc/hosts</code> 文件中添加以下内容：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">172.17.117.117 minio-1  <br>172.17.117.118 minio-2  <br>172.17.117.119 minio-3  <br>172.17.117.120 minio-4<br></code></pre></td></tr></table></figure>
+
+<h4 id="3-测试网络连通性"><a href="#3-测试网络连通性" class="headerlink" title="3. 测试网络连通性"></a>3. 测试网络连通性</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">ping minio-2<br>ping minio-3<br>ping minio-4<br></code></pre></td></tr></table></figure>
+
+<h2 id="MinIO-分布式容器化部署"><a href="#MinIO-分布式容器化部署" class="headerlink" title="MinIO 分布式容器化部署"></a>MinIO 分布式容器化部署</h2><h3 id="启动-MinIO-容器"><a href="#启动-MinIO-容器" class="headerlink" title="启动 MinIO 容器"></a>启动 MinIO 容器</h3><p>在每个节点上运行以下命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs bash">docker run -d \<br>  --name minio \<br>  --net=host \<br>  --restart=always \<br>  --privileged=<span class="hljs-literal">true</span> \<br>  -v /mnt/minio/data:/data \<br>  -e MINIO_ROOT_USER=OGMS \<br>  -e MINIO_ROOT_PASSWORD=ogms250410 \<br>  minio/minio:latest \<br>  server http://minio-&#123;1...4&#125;/data \<br>  --console-address <span class="hljs-string">&quot;0.0.0.0:9101&quot;</span> \<br>  --address <span class="hljs-string">&quot;0.0.0.0:9100&quot;</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="参数说明"><a href="#参数说明" class="headerlink" title="参数说明"></a>参数说明</h3><table>
+<thead>
+<tr>
+<th>参数</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>--net=host</code></td>
+<td>共享宿主机网络命名空间</td>
+</tr>
+<tr>
+<td><code>--restart=always</code></td>
+<td>容器自动重启</td>
+</tr>
+<tr>
+<td><code>--privileged=true</code></td>
+<td>给予容器特权模式</td>
+</tr>
+<tr>
+<td><code>-v /mnt/minio/data:/data</code></td>
+<td>数据持久化挂载</td>
+</tr>
+<tr>
+<td><code>MINIO_ROOT_USER</code></td>
+<td>MinIO 管理员用户名</td>
+</tr>
+<tr>
+<td><code>MINIO_ROOT_PASSWORD</code></td>
+<td>MinIO 管理员密码</td>
+</tr>
+<tr>
+<td><code>--console-address</code></td>
+<td>控制台访问地址</td>
+</tr>
+<tr>
+<td><code>--address</code></td>
+<td>API 访问地址</td>
+</tr>
+</tbody></table>
+<h3 id="检查容器状态"><a href="#检查容器状态" class="headerlink" title="检查容器状态"></a>检查容器状态</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">docker logs minio<br></code></pre></td></tr></table></figure>
+
+<h2 id="Nginx-负载均衡配置"><a href="#Nginx-负载均衡配置" class="headerlink" title="Nginx 负载均衡配置"></a>Nginx 负载均衡配置</h2><h3 id="启动-Nginx-容器"><a href="#启动-Nginx-容器" class="headerlink" title="启动 Nginx 容器"></a>启动 Nginx 容器</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs bash">docker run -d \<br>  --name minio_nginx \<br>  --net=host \<br>  -p 9000:9000 \<br>  -p 9001:9001 \<br>  -v /mnt/nginx/conf/nginx.conf:/etc/nginx/nginx.conf \<br>  --restart=always \<br>  --privileged=<span class="hljs-literal">true</span> \<br>  nginx:latest<br><br><span class="hljs-comment"># 或者使用 ARM 版本</span><br><span class="hljs-comment"># nginx:alpine-arm</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="Nginx-配置文件"><a href="#Nginx-配置文件" class="headerlink" title="Nginx 配置文件"></a>Nginx 配置文件</h3><p>创建 <code>/mnt/nginx/conf/nginx.conf</code> 文件：</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><code class="hljs nginx"><span class="hljs-attribute">worker_processes</span> auto;  <br><br><span class="hljs-section">events</span> &#123;  <br>    <span class="hljs-attribute">worker_connections</span> <span class="hljs-number">1024</span>;  <br>&#125;  <br><br><span class="hljs-section">http</span> &#123;  <br>    <span class="hljs-comment"># API 负载均衡  </span><br>    <span class="hljs-section">upstream</span> minio_api &#123;  <br>        ip_hash;   <span class="hljs-comment"># 使用 ip_hash，保证同一个客户端尽量落到同一节点，避免会话不一致  </span><br>        <span class="hljs-attribute">server</span> minio-<span class="hljs-number">1</span>:<span class="hljs-number">9100</span> max_fails=<span class="hljs-number">3</span> fail_timeout=<span class="hljs-number">30s</span>;  <br>        <span class="hljs-attribute">server</span> minio-<span class="hljs-number">2</span>:<span class="hljs-number">9100</span> max_fails=<span class="hljs-number">3</span> fail_timeout=<span class="hljs-number">30s</span>;  <br>        <span class="hljs-attribute">server</span> minio-<span class="hljs-number">3</span>:<span class="hljs-number">9100</span> max_fails=<span class="hljs-number">3</span> fail_timeout=<span class="hljs-number">30s</span>;  <br>        <span class="hljs-attribute">server</span> minio-<span class="hljs-number">4</span>:<span class="hljs-number">9100</span> max_fails=<span class="hljs-number">3</span> fail_timeout=<span class="hljs-number">30s</span>;  <br>    &#125;  <br><br>    <span class="hljs-comment"># 控制台负载均衡  </span><br>    <span class="hljs-section">upstream</span> minio_console &#123;  <br>        <span class="hljs-attribute">server</span> minio-<span class="hljs-number">1</span>:<span class="hljs-number">9101</span>;  <br>        <span class="hljs-attribute">server</span> minio-<span class="hljs-number">2</span>:<span class="hljs-number">9101</span>;  <br>        <span class="hljs-attribute">server</span> minio-<span class="hljs-number">3</span>:<span class="hljs-number">9101</span>;  <br>        <span class="hljs-attribute">server</span> minio-<span class="hljs-number">4</span>:<span class="hljs-number">9101</span>;  <br>    &#125;  <br><br>    <span class="hljs-comment"># MinIO API 服务</span><br>    <span class="hljs-section">server</span> &#123;  <br>        <span class="hljs-attribute">listen</span> <span class="hljs-number">9000</span>;  <br>        <span class="hljs-attribute">server_name</span> _;  <br><br>        <span class="hljs-attribute">client_max_body_size</span> <span class="hljs-number">0</span>;  <br>        <span class="hljs-attribute">proxy_buffering</span> <span class="hljs-literal">off</span>;  <br>        <span class="hljs-attribute">ignore_invalid_headers</span> <span class="hljs-literal">off</span>;  <br><br>        <span class="hljs-section">location</span> / &#123;  <br>            <span class="hljs-attribute">proxy_set_header</span> Host              <span class="hljs-variable">$http_host</span>;  <br>            <span class="hljs-attribute">proxy_set_header</span> X-Real-IP         <span class="hljs-variable">$remote_addr</span>;  <br>            <span class="hljs-attribute">proxy_set_header</span> X-Forwarded-For   <span class="hljs-variable">$proxy_add_x_forwarded_for</span>;  <br>            <span class="hljs-attribute">proxy_set_header</span> X-Forwarded-Proto <span class="hljs-variable">$scheme</span>;  <br><br>            <span class="hljs-attribute">proxy_connect_timeout</span> <span class="hljs-number">300</span>;  <br>            <span class="hljs-attribute">proxy_http_version</span> <span class="hljs-number">1</span>.<span class="hljs-number">1</span>;  <br>            <span class="hljs-attribute">chunked_transfer_encoding</span> <span class="hljs-literal">off</span>;  <br>            <span class="hljs-attribute">proxy_ignore_client_abort</span> <span class="hljs-literal">on</span>;  <br><br>            <span class="hljs-attribute">proxy_pass</span> http://minio_api;  <br>        &#125;  <br>    &#125;  <br><br>    <span class="hljs-comment"># MinIO Console 服务</span><br>    <span class="hljs-section">server</span> &#123;  <br>        <span class="hljs-attribute">listen</span> <span class="hljs-number">9001</span>;  <br>        <span class="hljs-attribute">server_name</span> _;  <br><br>        <span class="hljs-section">location</span> / &#123;  <br>            <span class="hljs-attribute">proxy_set_header</span> Host              <span class="hljs-variable">$http_host</span>;  <br>            <span class="hljs-attribute">proxy_set_header</span> X-Real-IP         <span class="hljs-variable">$remote_addr</span>;  <br>            <span class="hljs-attribute">proxy_set_header</span> X-Forwarded-For   <span class="hljs-variable">$proxy_add_x_forwarded_for</span>;  <br>            <span class="hljs-attribute">proxy_set_header</span> X-Forwarded-Proto <span class="hljs-variable">$scheme</span>;  <br><br>            <span class="hljs-attribute">proxy_pass</span> http://minio_console;  <br>        &#125;  <br>    &#125;  <br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="配置说明"><a href="#配置说明" class="headerlink" title="配置说明"></a>配置说明</h3><h4 id="负载均衡策略"><a href="#负载均衡策略" class="headerlink" title="负载均衡策略"></a>负载均衡策略</h4><ul>
+<li><strong>API 服务</strong>：使用 <code>ip_hash</code> 策略，确保同一客户端请求路由到同一节点</li>
+<li><strong>控制台服务</strong>：使用轮询策略，分散访问压力</li>
+</ul>
+<h4 id="端口映射"><a href="#端口映射" class="headerlink" title="端口映射"></a>端口映射</h4><table>
+<thead>
+<tr>
+<th>服务</th>
+<th>端口</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>MinIO API</td>
+<td>9000</td>
+<td>对象存储 API 接口</td>
+</tr>
+<tr>
+<td>MinIO Console</td>
+<td>9001</td>
+<td>Web 管理控制台</td>
+</tr>
+</tbody></table>
+<h2 id="🎯-部署完成"><a href="#🎯-部署完成" class="headerlink" title="🎯 部署完成"></a>🎯 部署完成</h2><p>部署完成后，你可以通过以下方式访问：</p>
+<ul>
+<li><strong>API 接口</strong>：<code>http://your-server:9000</code></li>
+<li><strong>管理控制台</strong>：<code>http://your-server:9001</code></li>
+</ul>
+<p>使用配置的用户名和密码登录管理控制台，开始使用 MinIO 分布式存储服务！</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/sunxun001/p/17420785.html">MinIO 分布式部署实践</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/masonlee/p/12811784.html">MinIO 集群部署指南</a></li>
+</ul>
+<hr>
+<blockquote>
+<p>💡 <strong>小贴士</strong>：定期检查容器状态和日志，确保服务正常运行。建议设置监控告警，及时发现和处理问题。</p>
+</blockquote>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/MinIO-Docker-%E5%88%86%E5%B8%83%E5%BC%8F/" class="print-no-link">#MinIO Docker 分布式</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>MinIO 分布式部署（Docker）</div>
+      <div>http://example.com/2025/09/05/MinIO-分布式部署（Docker）/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Lingkai Shi</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年9月5日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/09/05/MinIO-%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%EF%BC%88Kubernetes%EF%BC%89/" title="MinIO 分布式部署（Kubernetes）">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">MinIO 分布式部署（Kubernetes）</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/08/09/Vue-Composables-%E7%BB%84%E5%90%88%E5%BC%8F%E5%87%BD%E6%95%B0%E7%9A%84%E5%BA%94%E7%94%A8/" title="Vue Composables - 组合式函数的应用">
+                        <span class="hidden-mobile">Vue Composables - 组合式函数的应用</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  
+  
+    <article id="comments" lazyload>
+      
+  <div id="valine"></div>
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#valine', function() {
+      Fluid.utils.createScript('https://lib.baomitu.com/valine/1.5.1/Valine.min.js', function() {
+        var options = Object.assign(
+          {"appId":"UI6r4jx4Fi5JCbcprPm3mTAh-MdYXbMMI","appKey":"wdCPROJ2afmmDwNeZCaOUodT","path":"window.location.pathname","placeholder":"来都来了，不留下点什么吗？","avatar":"retro","meta":["nick","mail","link"],"requiredFields":[],"pageSize":10,"lang":"zh-CN","highlight":true,"recordIP":false,"serverURLs":"https://ui6r4jx4.api.lncldglobal.com","emojiCDN":null,"emojiMaps":null,"enableQQ":true},
+          {
+            el: "#valine",
+            path: window.location.pathname
+          }
+        )
+        new Valine(options);
+        Fluid.utils.waitElementVisible('#valine .vcontent', () => {
+          var imgSelector = '#valine .vcontent img:not(.vemoji)';
+          Fluid.plugins.imageCaption(imgSelector);
+          Fluid.plugins.fancyBox(imgSelector);
+        })
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+    </article>
+  
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <i class="iconfont icon-brush"></i> <span>To Freedom, With Ink.</span> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+  <script type="text/javascript"
+  color="220,220,220" opacity='0.7' zIndex="-2" count="200" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js">
+  </script>
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
