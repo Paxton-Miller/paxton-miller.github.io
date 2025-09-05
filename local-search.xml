@@ -14,7 +14,11 @@
     
     <tags>
       
-      <tag>MinIO;Kubernetes;分布式</tag>
+      <tag>MinIO</tag>
+      
+      <tag>Kubernetes</tag>
+      
+      <tag>分布式</tag>
       
     </tags>
     
