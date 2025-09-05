@@ -19,18 +19,22 @@
   <meta name="author" content="Lingkai Shi">
   <meta name="keywords" content="">
   
-    <meta name="description" content="MinIO 分布式部署（Docker）📋 目录 为什么选择分布式部署？ 部署前准备 MinIO 分布式容器化部署 Nginx 负载均衡配置 参考资料  为什么选择分布式部署？MinIO 单体应用并不能发挥 MinIO 自带分布式存储的优势：  ✅ 数据容灾：多节点备份，防止数据丢失 ✅ 负载均衡：分散请求压力，提高性能 ✅ 高可用性：避免单点故障，确保服务稳定运行   ⚠️ 注意：单节点部署难免">
+    <meta name="description" content="📋 目录 为什么选择分布式部署？ 部署前准备 MinIO 分布式容器化部署 Nginx 负载均衡配置 参考资料  为什么选择分布式部署？MinIO 单体应用并不能发挥 MinIO 自带分布式存储的优势：  ✅ 数据容灾：多节点备份，防止数据丢失 ✅ 负载均衡：分散请求压力，提高性能 ✅ 高可用性：避免单点故障，确保服务稳定运行   ⚠️ 注意：单节点部署难免会出现单点故障，无法做到服务的高可用">
 <meta property="og:type" content="article">
 <meta property="og:title" content="MinIO 分布式部署（Docker）">
 <meta property="og:url" content="http://example.com/2025/09/05/MinIO-%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%EF%BC%88Docker%EF%BC%89/index.html">
 <meta property="og:site_name" content="码上自由的博客">
-<meta property="og:description" content="MinIO 分布式部署（Docker）📋 目录 为什么选择分布式部署？ 部署前准备 MinIO 分布式容器化部署 Nginx 负载均衡配置 参考资料  为什么选择分布式部署？MinIO 单体应用并不能发挥 MinIO 自带分布式存储的优势：  ✅ 数据容灾：多节点备份，防止数据丢失 ✅ 负载均衡：分散请求压力，提高性能 ✅ 高可用性：避免单点故障，确保服务稳定运行   ⚠️ 注意：单节点部署难免">
+<meta property="og:description" content="📋 目录 为什么选择分布式部署？ 部署前准备 MinIO 分布式容器化部署 Nginx 负载均衡配置 参考资料  为什么选择分布式部署？MinIO 单体应用并不能发挥 MinIO 自带分布式存储的优势：  ✅ 数据容灾：多节点备份，防止数据丢失 ✅ 负载均衡：分散请求压力，提高性能 ✅ 高可用性：避免单点故障，确保服务稳定运行   ⚠️ 注意：单节点部署难免会出现单点故障，无法做到服务的高可用">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kodekloud.com/community/uploads/db1265/original/3X/3/7/3796462d59a1e7869afe2c82aedc7a949f8e9dcc.jpeg">
 <meta property="article:published_time" content="2025-09-05T02:40:39.000Z">
-<meta property="article:modified_time" content="2025-09-05T02:44:26.509Z">
+<meta property="article:modified_time" content="2025-09-05T03:20:12.471Z">
 <meta property="article:author" content="Lingkai Shi">
-<meta property="article:tag" content="MinIO Docker 分布式">
+<meta property="article:tag" content="MinIO">
+<meta property="article:tag" content="Docker">
+<meta property="article:tag" content="分布式">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://kodekloud.com/community/uploads/db1265/original/3X/3/7/3796462d59a1e7869afe2c82aedc7a949f8e9dcc.jpeg">
   
   
   
@@ -227,7 +231,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          848 字
+          800 字
         
       </span>
     
@@ -238,7 +242,7 @@
         
         
         
-          8 分钟
+          7 分钟
         
       </span>
     
@@ -280,7 +284,7 @@
             
               <div class="markdown-body">
                 
-                <h1 id="MinIO-分布式部署（Docker）"><a href="#MinIO-分布式部署（Docker）" class="headerlink" title="MinIO 分布式部署（Docker）"></a>MinIO 分布式部署（Docker）</h1><h2 id="📋-目录"><a href="#📋-目录" class="headerlink" title="📋 目录"></a>📋 目录</h2><ul>
+                <h2 id="📋-目录"><a href="#📋-目录" class="headerlink" title="📋 目录"></a>📋 目录</h2><ul>
 <li><a href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%80%89%E6%8B%A9%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2">为什么选择分布式部署？</a></li>
 <li><a href="#%E9%83%A8%E7%BD%B2%E5%89%8D%E5%87%86%E5%A4%87">部署前准备</a></li>
 <li><a href="#minio-%E5%88%86%E5%B8%83%E5%BC%8F%E5%AE%B9%E5%99%A8%E5%8C%96%E9%83%A8%E7%BD%B2">MinIO 分布式容器化部署</a></li>
@@ -310,10 +314,10 @@
 <h4 id="2-配置主机名解析"><a href="#2-配置主机名解析" class="headerlink" title="2. 配置主机名解析"></a>2. 配置主机名解析</h4><p>在每个节点的 <code>/etc/hosts</code> 文件中添加以下内容：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">172.17.117.117 minio-1  <br>172.17.117.118 minio-2  <br>172.17.117.119 minio-3  <br>172.17.117.120 minio-4<br></code></pre></td></tr></table></figure>
 
-<h4 id="3-测试网络连通性"><a href="#3-测试网络连通性" class="headerlink" title="3. 测试网络连通性"></a>3. 测试网络连通性</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">ping minio-2<br>ping minio-3<br>ping minio-4<br></code></pre></td></tr></table></figure>
+<h4 id="3-测试网络连通性"><a href="#3-测试网络连通性" class="headerlink" title="3. 测试网络连通性"></a>3. 测试网络连通性</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">ping minio-1<br>ping minio-2<br>ping minio-3<br>ping minio-4<br></code></pre></td></tr></table></figure>
 
 <h2 id="MinIO-分布式容器化部署"><a href="#MinIO-分布式容器化部署" class="headerlink" title="MinIO 分布式容器化部署"></a>MinIO 分布式容器化部署</h2><h3 id="启动-MinIO-容器"><a href="#启动-MinIO-容器" class="headerlink" title="启动 MinIO 容器"></a>启动 MinIO 容器</h3><p>在每个节点上运行以下命令：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs bash">docker run -d \<br>  --name minio \<br>  --net=host \<br>  --restart=always \<br>  --privileged=<span class="hljs-literal">true</span> \<br>  -v /mnt/minio/data:/data \<br>  -e MINIO_ROOT_USER=OGMS \<br>  -e MINIO_ROOT_PASSWORD=ogms250410 \<br>  minio/minio:latest \<br>  server http://minio-&#123;1...4&#125;/data \<br>  --console-address <span class="hljs-string">&quot;0.0.0.0:9101&quot;</span> \<br>  --address <span class="hljs-string">&quot;0.0.0.0:9100&quot;</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">docker run -d --name minio --net=host --restart=always --privileged=<span class="hljs-literal">true</span> -v /mnt/minio/data:/data -e MINIO_ROOT_USER=OGMS -e MINIO_ROOT_PASSWORD=ogms250410 minio/minio:latest server http://minio-&#123;1...4&#125;/data --console-address <span class="hljs-string">&quot;0.0.0.0:9101&quot;</span> --address <span class="hljs-string">&quot;0.0.0.0:9100&quot;</span><br></code></pre></td></tr></table></figure>
 
 <h3 id="参数说明"><a href="#参数说明" class="headerlink" title="参数说明"></a>参数说明</h3><table>
 <thead>
@@ -357,7 +361,7 @@
 </tbody></table>
 <h3 id="检查容器状态"><a href="#检查容器状态" class="headerlink" title="检查容器状态"></a>检查容器状态</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">docker logs minio<br></code></pre></td></tr></table></figure>
 
-<h2 id="Nginx-负载均衡配置"><a href="#Nginx-负载均衡配置" class="headerlink" title="Nginx 负载均衡配置"></a>Nginx 负载均衡配置</h2><h3 id="启动-Nginx-容器"><a href="#启动-Nginx-容器" class="headerlink" title="启动 Nginx 容器"></a>启动 Nginx 容器</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs bash">docker run -d \<br>  --name minio_nginx \<br>  --net=host \<br>  -p 9000:9000 \<br>  -p 9001:9001 \<br>  -v /mnt/nginx/conf/nginx.conf:/etc/nginx/nginx.conf \<br>  --restart=always \<br>  --privileged=<span class="hljs-literal">true</span> \<br>  nginx:latest<br><br><span class="hljs-comment"># 或者使用 ARM 版本</span><br><span class="hljs-comment"># nginx:alpine-arm</span><br></code></pre></td></tr></table></figure>
+<h2 id="Nginx-负载均衡配置"><a href="#Nginx-负载均衡配置" class="headerlink" title="Nginx 负载均衡配置"></a>Nginx 负载均衡配置</h2><h3 id="启动-Nginx-容器"><a href="#启动-Nginx-容器" class="headerlink" title="启动 Nginx 容器"></a>启动 Nginx 容器</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">docker run -d --name minio_nginx --net=host -p 9000:9000 -p 9001:9001 -v /mnt/nginx/conf/nginx.conf:/etc/nginx/nginx.conf --restart=always --privileged=<span class="hljs-literal">true</span> nginx:latest<br><br><span class="hljs-comment"># 或者使用 ARM 版本</span><br><span class="hljs-comment"># nginx:alpine-arm</span><br></code></pre></td></tr></table></figure>
 
 <h3 id="Nginx-配置文件"><a href="#Nginx-配置文件" class="headerlink" title="Nginx 配置文件"></a>Nginx 配置文件</h3><p>创建 <code>/mnt/nginx/conf/nginx.conf</code> 文件：</p>
 <figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><code class="hljs nginx"><span class="hljs-attribute">worker_processes</span> auto;  <br><br><span class="hljs-section">events</span> &#123;  <br>    <span class="hljs-attribute">worker_connections</span> <span class="hljs-number">1024</span>;  <br>&#125;  <br><br><span class="hljs-section">http</span> &#123;  <br>    <span class="hljs-comment"># API 负载均衡  </span><br>    <span class="hljs-section">upstream</span> minio_api &#123;  <br>        ip_hash;   <span class="hljs-comment"># 使用 ip_hash，保证同一个客户端尽量落到同一节点，避免会话不一致  </span><br>        <span class="hljs-attribute">server</span> minio-<span class="hljs-number">1</span>:<span class="hljs-number">9100</span> max_fails=<span class="hljs-number">3</span> fail_timeout=<span class="hljs-number">30s</span>;  <br>        <span class="hljs-attribute">server</span> minio-<span class="hljs-number">2</span>:<span class="hljs-number">9100</span> max_fails=<span class="hljs-number">3</span> fail_timeout=<span class="hljs-number">30s</span>;  <br>        <span class="hljs-attribute">server</span> minio-<span class="hljs-number">3</span>:<span class="hljs-number">9100</span> max_fails=<span class="hljs-number">3</span> fail_timeout=<span class="hljs-number">30s</span>;  <br>        <span class="hljs-attribute">server</span> minio-<span class="hljs-number">4</span>:<span class="hljs-number">9100</span> max_fails=<span class="hljs-number">3</span> fail_timeout=<span class="hljs-number">30s</span>;  <br>    &#125;  <br><br>    <span class="hljs-comment"># 控制台负载均衡  </span><br>    <span class="hljs-section">upstream</span> minio_console &#123;  <br>        <span class="hljs-attribute">server</span> minio-<span class="hljs-number">1</span>:<span class="hljs-number">9101</span>;  <br>        <span class="hljs-attribute">server</span> minio-<span class="hljs-number">2</span>:<span class="hljs-number">9101</span>;  <br>        <span class="hljs-attribute">server</span> minio-<span class="hljs-number">3</span>:<span class="hljs-number">9101</span>;  <br>        <span class="hljs-attribute">server</span> minio-<span class="hljs-number">4</span>:<span class="hljs-number">9101</span>;  <br>    &#125;  <br><br>    <span class="hljs-comment"># MinIO API 服务</span><br>    <span class="hljs-section">server</span> &#123;  <br>        <span class="hljs-attribute">listen</span> <span class="hljs-number">9000</span>;  <br>        <span class="hljs-attribute">server_name</span> _;  <br><br>        <span class="hljs-attribute">client_max_body_size</span> <span class="hljs-number">0</span>;  <br>        <span class="hljs-attribute">proxy_buffering</span> <span class="hljs-literal">off</span>;  <br>        <span class="hljs-attribute">ignore_invalid_headers</span> <span class="hljs-literal">off</span>;  <br><br>        <span class="hljs-section">location</span> / &#123;  <br>            <span class="hljs-attribute">proxy_set_header</span> Host              <span class="hljs-variable">$http_host</span>;  <br>            <span class="hljs-attribute">proxy_set_header</span> X-Real-IP         <span class="hljs-variable">$remote_addr</span>;  <br>            <span class="hljs-attribute">proxy_set_header</span> X-Forwarded-For   <span class="hljs-variable">$proxy_add_x_forwarded_for</span>;  <br>            <span class="hljs-attribute">proxy_set_header</span> X-Forwarded-Proto <span class="hljs-variable">$scheme</span>;  <br><br>            <span class="hljs-attribute">proxy_connect_timeout</span> <span class="hljs-number">300</span>;  <br>            <span class="hljs-attribute">proxy_http_version</span> <span class="hljs-number">1</span>.<span class="hljs-number">1</span>;  <br>            <span class="hljs-attribute">chunked_transfer_encoding</span> <span class="hljs-literal">off</span>;  <br>            <span class="hljs-attribute">proxy_ignore_client_abort</span> <span class="hljs-literal">on</span>;  <br><br>            <span class="hljs-attribute">proxy_pass</span> http://minio_api;  <br>        &#125;  <br>    &#125;  <br><br>    <span class="hljs-comment"># MinIO Console 服务</span><br>    <span class="hljs-section">server</span> &#123;  <br>        <span class="hljs-attribute">listen</span> <span class="hljs-number">9001</span>;  <br>        <span class="hljs-attribute">server_name</span> _;  <br><br>        <span class="hljs-section">location</span> / &#123;  <br>            <span class="hljs-attribute">proxy_set_header</span> Host              <span class="hljs-variable">$http_host</span>;  <br>            <span class="hljs-attribute">proxy_set_header</span> X-Real-IP         <span class="hljs-variable">$remote_addr</span>;  <br>            <span class="hljs-attribute">proxy_set_header</span> X-Forwarded-For   <span class="hljs-variable">$proxy_add_x_forwarded_for</span>;  <br>            <span class="hljs-attribute">proxy_set_header</span> X-Forwarded-Proto <span class="hljs-variable">$scheme</span>;  <br><br>            <span class="hljs-attribute">proxy_pass</span> http://minio_console;  <br>        &#125;  <br>    &#125;  <br>&#125;<br></code></pre></td></tr></table></figure>
@@ -395,10 +399,6 @@
 <li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/sunxun001/p/17420785.html">MinIO 分布式部署实践</a></li>
 <li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/masonlee/p/12811784.html">MinIO 集群部署指南</a></li>
 </ul>
-<hr>
-<blockquote>
-<p>💡 <strong>小贴士</strong>：定期检查容器状态和日志，确保服务正常运行。建议设置监控告警，及时发现和处理问题。</p>
-</blockquote>
 
                 
               </div>
@@ -411,7 +411,11 @@
     <div class="post-meta">
       <i class="iconfont icon-tags"></i>
       
-        <a href="/tags/MinIO-Docker-%E5%88%86%E5%B8%83%E5%BC%8F/" class="print-no-link">#MinIO Docker 分布式</a>
+        <a href="/tags/MinIO/" class="print-no-link">#MinIO</a>
+      
+        <a href="/tags/Docker/" class="print-no-link">#Docker</a>
+      
+        <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" class="print-no-link">#分布式</a>
       
     </div>
   
