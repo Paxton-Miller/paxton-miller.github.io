@@ -4,6 +4,54 @@
   
   
   <entry>
+    <title>Ray 集群容器化部署</title>
+    <link href="/2025/09/08/Ray-%E9%9B%86%E7%BE%A4%E5%AE%B9%E5%99%A8%E5%8C%96%E9%83%A8%E7%BD%B2/"/>
+    <url>/2025/09/08/Ray-%E9%9B%86%E7%BE%A4%E5%AE%B9%E5%99%A8%E5%8C%96%E9%83%A8%E7%BD%B2/</url>
+    
+    <content type="html"><![CDATA[<blockquote><p>本文演示如何用 Docker 启动一个 Ray 集群（1 主 + 多工作节点），并说明关键参数与常见问题。适用于在同一二层网络或使用 host 网络的场景。</p></blockquote><h2 id="前置条件"><a href="#前置条件" class="headerlink" title="前置条件"></a>前置条件</h2><ul><li>Docker 已安装并可用（rootless&#x2F;标准均可）</li><li>可访问的镜像 <code>model-server:0812</code>（包含 Ray 及你的服务）</li><li>所有节点时间同步、网络互通（尤其是 6379、8265、你的服务端口）</li><li>资源规划：CPU&#x2F;内存&#x2F;共享内存（&#x2F;dev&#x2F;shm）</li></ul><h2 id="启动主节点（Head）"><a href="#启动主节点（Head）" class="headerlink" title="启动主节点（Head）"></a>启动主节点（Head）</h2><p>通过 <code>ray start</code> 启动主节点容器，并开启 Dashboard 与资源限制：</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 启动主节点（Head）</span><br>docker run -d --name ray-head \<br>  -p 5000:5000 \            <span class="hljs-comment"># 映射自定义 API 服务端口（示例）</span><br>  -p 6379:6379 \             <span class="hljs-comment"># Ray 集群内部通信端口（GCS）</span><br>  -p 8265:8265 \             <span class="hljs-comment"># Ray Dashboard 端口</span><br>  -v /mnt/volumes/modelServer:/usr/resource \  <span class="hljs-comment"># 业务资源挂载</span><br>  --network=host \           <span class="hljs-comment"># 与宿主机共享网络（见下方注意事项）</span><br>  -w /usr/resource \          <span class="hljs-comment"># 工作目录</span><br>  --restart=always \          <span class="hljs-comment"># 异常退出自动重启</span><br>  --privileged=<span class="hljs-literal">true</span> \         <span class="hljs-comment"># （如非必要可移除）</span><br>  --shm-size=13gb \           <span class="hljs-comment"># 共享内存，需 &gt; object-store-memory</span><br>  model-server:0812 bash -c \<br>  <span class="hljs-string">&quot;ray start \</span><br><span class="hljs-string">    --include-dashboard=True \</span><br><span class="hljs-string">    --head \</span><br><span class="hljs-string">    --node-ip-address=0.0.0.0 \           # 监听地址</span><br><span class="hljs-string">    --port=6379 \                          # GCS 端口</span><br><span class="hljs-string">    --dashboard-host=0.0.0.0 \             # Dashboard 绑定地址</span><br><span class="hljs-string">    --num-cpus=36 \                        # 此节点可用 CPU 数</span><br><span class="hljs-string">    --memory=80000000000 \                 # 可用内存（bytes）</span><br><span class="hljs-string">    --object-store-memory=12000000000 \    # 对象存储内存（bytes）</span><br><span class="hljs-string">    &amp;&amp; python -m dataProcessing.server&quot;</span>     <span class="hljs-comment"># 启动你的业务服务</span><br><br><span class="hljs-comment"># 检查启动日志</span><br>docker logs ray-head<br></code></pre></td></tr></table></figure><ul><li><strong>端口说明</strong>：<ul><li><strong>5000</strong>：示例中的业务 API 服务（可按需调整）</li><li><strong>6379</strong>：Ray Head 的 GCS 端口（Worker 通过此端口加入）</li><li><strong>8265</strong>：Ray Dashboard（Web UI）</li></ul></li><li><strong>网络模式</strong>：示例使用 <code>--network=host</code>，确保所有节点能直连 Head 的 <code>6379/8265</code>。在云环境（如公有云）中，host 网络需谨慎；</li><li><strong>共享内存</strong>：<code>--shm-size</code> 必须大于 <code>--object-store-memory</code>，否则对象存储易 OOM 或报错。</li><li><strong>privileged</strong>：通常不必需，建议移除，除非你的服务确实需要。</li></ul><h2 id="启动工作节点（Worker）"><a href="#启动工作节点（Worker）" class="headerlink" title="启动工作节点（Worker）"></a>启动工作节点（Worker）</h2><p>每个 Worker 通过 <code>--address=&#39;&lt;HEAD_IP&gt;:6379&#39;</code> 加入集群：</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 启动工作节点 1</span><br>docker run -d --name ray-worker_1 \<br>  --shm-size=13gb \<br>  --network=host \<br>  -v /mnt/volumes/modelServer:/usr/resource \<br>  model-server:0812 bash -c \<br>  <span class="hljs-string">&quot;ray start \</span><br><span class="hljs-string">    --address=&#x27;172.31.13.23:6379&#x27; \   # 替换为 Head 节点实际 IP:PORT</span><br><span class="hljs-string">    --num-cpus=36 \                   # 分配给该 Worker 的 CPU 数</span><br><span class="hljs-string">    --memory=80000000000 \            # 该 Worker 可用内存（bytes）</span><br><span class="hljs-string">    --object-store-memory=12000000000 \  # 该 Worker 对象存储内存</span><br><span class="hljs-string">    --block&quot;</span>                          <span class="hljs-comment"># 前台阻塞，容器保持运行</span><br></code></pre></td></tr></table></figure><ul><li>多个 Worker 可重复上述命令，修改容器名与资源参数。</li><li>若非 host 网络，需确保容器能访问到 Head 的 <code>6379</code> 端口（映射端口或内网解析）。</li></ul><h2 id="Python-端连接与资源注解"><a href="#Python-端连接与资源注解" class="headerlink" title="Python 端连接与资源注解"></a>Python 端连接与资源注解</h2><p>在 Python 中连接已启动的 Ray 集群：</p><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> ray<br><br><span class="hljs-comment"># 集群模式：使用已存在的 Head（ray start 启动）</span><br>ray.init(address=<span class="hljs-string">&quot;auto&quot;</span>)<br><br><span class="hljs-meta">@ray.remote(<span class="hljs-params">num_cpus=<span class="hljs-number">4</span>, memory=<span class="hljs-number">12</span> * <span class="hljs-number">1024</span>**<span class="hljs-number">3</span></span>)</span><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">my_task</span>():<br>    ...<br></code></pre></td></tr></table></figure><ul><li><strong>重要区别</strong>：<ul><li>集群模式下，资源（CPU&#x2F;内存&#x2F;对象存储）应主要在 <code>ray start</code> 层面配置。</li><li><code>ray.init(_memory=...)</code> 更适用于单机调试（不通过 <code>ray start</code> 手动起节点），在集群中不生效或不建议依赖。</li></ul></li></ul><h2 id="验证与可视化"><a href="#验证与可视化" class="headerlink" title="验证与可视化"></a>验证与可视化</h2><ul><li>访问 Dashboard：<code>http://172.31.13.23:8265</code>（替换为 Head IP）</li><li>在 Python 中验证：</li></ul><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> ray<br><span class="hljs-built_in">print</span>(ray.is_initialized())<br><span class="hljs-built_in">print</span>(ray.available_resources())<br></code></pre></td></tr></table></figure><h2 id="常见问题与修正建议"><a href="#常见问题与修正建议" class="headerlink" title="常见问题与修正建议"></a>常见问题与修正建议</h2><ul><li>注意：<code>--network=host</code> 与 <code>-p</code> 同时使用在大多数 Docker 版本中无效（host 模式会忽略 <code>-p</code>）。</li><li>资源单位为字节，容易写错。示例中 <code>--memory=80000000000</code> &#x3D; 80 GB ≈ 74.5 GiB，<code>--object-store-memory=12000000000</code> ≈ 11.2 GiB，请按物理资源调整。</li><li><code>--privileged=true</code> 非必要，建议移除以降低安全风险。</li></ul>]]></content>
+    
+    
+    
+    <tags>
+      
+      <tag>Docker</tag>
+      
+      <tag>Ray</tag>
+      
+      <tag>分布式计算</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>React 学习笔记(一): 起步的一些问题记录</title>
+    <link href="/2025/09/07/React-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-%E4%B8%80-%E8%B5%B7%E6%AD%A5%E7%9A%84%E4%B8%80%E4%BA%9B%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95/"/>
+    <url>/2025/09/07/React-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-%E4%B8%80-%E8%B5%B7%E6%AD%A5%E7%9A%84%E4%B8%80%E4%BA%9B%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95/</url>
+    
+    <content type="html"><![CDATA[<h2 id="1️⃣-js-逻辑与"><a href="#1️⃣-js-逻辑与" class="headerlink" title="1️⃣ js 逻辑与 &amp;&amp;"></a>1️⃣ js 逻辑与 <code>&amp;&amp;</code></h2><ul><li>强类型语言，一定会返回<code>true</code>或<code>false</code></li><li>弱类型语言，例如python和js，按照<strong>短路求值</strong>和<strong>真值&#x2F;假值</strong>机制，返回其中一个操作数，而不是强制布尔值。</li></ul><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-string">&quot;hi&quot;</span> &amp;&amp; <span class="hljs-number">123</span>   <span class="hljs-comment">// =&gt; 123</span><br><span class="hljs-number">0</span> &amp;&amp; <span class="hljs-string">&quot;hi&quot;</span>     <span class="hljs-comment">// =&gt; 0</span><br><span class="hljs-literal">false</span> &amp;&amp; <span class="hljs-string">&quot;hi&quot;</span> <span class="hljs-comment">// =&gt; false</span><br></code></pre></td></tr></table></figure><p>所以以下两种写法等价：</p><figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs jsx">&lt;&gt;<br>&#123;<br>isLoggedIn ? (<span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">AdminPanel</span> /&gt;</span></span>) : (<span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">LoginPanel</span> /&gt;</span></span>)<br>&#125;<br>&lt;/&gt;<br><br><span class="hljs-comment">// 当你不需要else分支时：</span><br><span class="language-xml"><span class="hljs-tag">&lt;&gt;</span></span><br><span class="language-xml">&#123; isLoggedIn &amp;&amp; <span class="hljs-tag">&lt;<span class="hljs-name">AdminPanel</span> /&gt;</span> &#125;</span><br><span class="language-xml"><span class="hljs-tag">&lt;/&gt;</span></span><br></code></pre></td></tr></table></figure><blockquote><p>注意⚠️： 在React中，忽略 <code>false</code>、<code>null</code>、<code>undefined</code> → 不渲染任何东西；</p></blockquote><h2 id="2️⃣-React-渲染逻辑"><a href="#2️⃣-React-渲染逻辑" class="headerlink" title="2️⃣ React 渲染逻辑"></a>2️⃣ React 渲染逻辑</h2><p><code>&lt;AdminPanel /&gt;</code> 会被React编译，返回一个React元素描述对象，而不是以调用函数的形式直接运行组件函数。</p><p>例如编译前：</p><figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs jsx">&lt;&gt;<br><span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">AdminPanel</span> /&gt;</span></span><br>&lt;/&gt;<br></code></pre></td></tr></table></figure><p>编译后：</p><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-title class_">React</span>.<span class="hljs-title function_">createElement</span>(<span class="hljs-title class_">AdminPanel</span>, <span class="hljs-literal">null</span>);<br><br><span class="hljs-comment">// React 17后：</span><br><span class="hljs-keyword">import</span> &#123; jsx <span class="hljs-keyword">as</span> _jsx &#125; <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;react/jsx-runtime&quot;</span>;<br><span class="hljs-title function_">_jsx</span>(<span class="hljs-title class_">AdminPanel</span>, &#123;&#125;);<br><br><span class="hljs-comment">// 返回值，也即React元素对象长这样：</span><br>&#123;<br>  <span class="hljs-attr">type</span>: <span class="hljs-title class_">AdminPanel</span>,<br>  <span class="hljs-attr">props</span>: &#123;&#125;,<br>  <span class="hljs-attr">key</span>: <span class="hljs-literal">null</span>,<br>  <span class="hljs-attr">ref</span>: <span class="hljs-literal">null</span><br>&#125;<br></code></pre></td></tr></table></figure>]]></content>
+    
+    
+    <categories>
+      
+      <category>Web前端</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>React</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>全栈技术员知识图</title>
     <link href="/2025/09/07/%E5%85%A8%E6%A0%88%E6%8A%80%E6%9C%AF%E5%91%98%E7%9F%A5%E8%AF%86%E5%9B%BE/"/>
     <url>/2025/09/07/%E5%85%A8%E6%A0%88%E6%8A%80%E6%9C%AF%E5%91%98%E7%9F%A5%E8%AF%86%E5%9B%BE/</url>
@@ -66,9 +114,9 @@
       
       <tag>MinIO</tag>
       
-      <tag>分布式</tag>
-      
       <tag>Kubernetes</tag>
+      
+      <tag>分布式存储</tag>
       
     </tags>
     
@@ -97,9 +145,9 @@
       
       <tag>Docker</tag>
       
-      <tag>分布式</tag>
-      
       <tag>Nginx</tag>
+      
+      <tag>分布式存储</tag>
       
     </tags>
     
