@@ -19,14 +19,16 @@
   <meta name="author" content="Lingkai Shi">
   <meta name="keywords" content="">
   
-    <meta property="og:type" content="article">
-<meta property="og:title" content="React 学习笔记(四): 变量管理useRef + useMemo + useState">
-<meta property="og:url" content="http://example.com/2025/10/20/React-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-%E5%9B%9B-%E5%8F%98%E9%87%8F%E7%AE%A1%E7%90%86useRef-useMemo-useState/index.html">
+    <meta name="description" content="⚛️ React Hook 学习笔记：useRef vs useMemo vs useState这三个 Hook 都是 React 中的“状态管理 &amp; 性能优化”核心工具。但它们的用途完全不同 👇  🧩 一、useState —— 管理组件状态（可触发渲染）12345678const [count, setCount] &#x3D; useState(0);return (  &lt;&gt;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="React 学习笔记(四): 变量管理 useRef + useMemo + useState">
+<meta property="og:url" content="http://example.com/2025/09/20/React-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-%E5%9B%9B-%E5%8F%98%E9%87%8F%E7%AE%A1%E7%90%86useRef-useMemo-useState/index.html">
 <meta property="og:site_name" content="码上自由的博客">
+<meta property="og:description" content="⚛️ React Hook 学习笔记：useRef vs useMemo vs useState这三个 Hook 都是 React 中的“状态管理 &amp; 性能优化”核心工具。但它们的用途完全不同 👇  🧩 一、useState —— 管理组件状态（可触发渲染）12345678const [count, setCount] &#x3D; useState(0);return (  &lt;&gt;">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://devio2023-media.developers.io/wp-content/uploads/2019/07/react.jpg">
-<meta property="article:published_time" content="2025-10-20T14:01:44.000Z">
-<meta property="article:modified_time" content="2025-10-20T14:02:04.499Z">
+<meta property="article:published_time" content="2025-09-20T14:01:44.000Z">
+<meta property="article:modified_time" content="2025-11-01T08:50:37.624Z">
 <meta property="article:author" content="Lingkai Shi">
 <meta property="article:tag" content="React">
 <meta name="twitter:card" content="summary_large_image">
@@ -34,7 +36,7 @@
   
   
   
-  <title>React 学习笔记(四): 变量管理useRef + useMemo + useState - 码上自由的博客</title>
+  <title>React 学习笔记(四): 变量管理 useRef + useMemo + useState - 码上自由的博客</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -204,7 +206,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="React 学习笔记(四): 变量管理useRef + useMemo + useState"></span>
+            <span id="subtitle" data-typed-text="React 学习笔记(四): 变量管理 useRef + useMemo + useState"></span>
           
         </div>
 
@@ -215,8 +217,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2025-10-20 22:01" pubdate>
-          2025年10月20日 晚上
+        <time datetime="2025-09-20 22:01" pubdate>
+          2025年9月20日 晚上
         </time>
       </span>
     
@@ -227,7 +229,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          0 字
+          511 字
         
       </span>
     
@@ -238,7 +240,7 @@
         
         
         
-          1 分钟
+          5 分钟
         
       </span>
     
@@ -275,12 +277,88 @@
       <div class="container nopadding-x-md" id="board-ctn">
         <div id="board">
           <article class="post-content mx-auto">
-            <h1 id="seo-header">React 学习笔记(四): 变量管理useRef + useMemo + useState</h1>
+            <h1 id="seo-header">React 学习笔记(四): 变量管理 useRef + useMemo + useState</h1>
             
             
               <div class="markdown-body">
                 
-                
+                <h1 id="⚛️-React-Hook-学习笔记：useRef-vs-useMemo-vs-useState"><a href="#⚛️-React-Hook-学习笔记：useRef-vs-useMemo-vs-useState" class="headerlink" title="⚛️ React Hook 学习笔记：useRef vs useMemo vs useState"></a>⚛️ React Hook 学习笔记：<code>useRef</code> vs <code>useMemo</code> vs <code>useState</code></h1><p>这三个 Hook 都是 React 中的“状态管理 &amp; 性能优化”核心工具。<br>但它们的用途完全不同 👇</p>
+<hr>
+<h2 id="🧩-一、useState-——-管理组件状态（可触发渲染）"><a href="#🧩-一、useState-——-管理组件状态（可触发渲染）" class="headerlink" title="🧩 一、useState —— 管理组件状态（可触发渲染）"></a>🧩 一、<code>useState</code> —— 管理组件状态（可触发渲染）</h2><figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs tsx"><span class="hljs-keyword">const</span> [count, setCount] = <span class="hljs-title function_">useState</span>(<span class="hljs-number">0</span>);<br><br><span class="hljs-keyword">return</span> (<br>  <span class="language-xml"><span class="hljs-tag">&lt;&gt;</span></span><br><span class="language-xml">    <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>点击次数：&#123;count&#125;<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></span><br><span class="language-xml">    <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">&#123;()</span> =&gt;</span> setCount(count + 1)&#125;&gt;+1<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span></span><br><span class="language-xml">  <span class="hljs-tag">&lt;/&gt;</span></span><br>);<br></code></pre></td></tr></table></figure>
+
+<h3 id="✅-特点"><a href="#✅-特点" class="headerlink" title="✅ 特点"></a>✅ 特点</h3><ul>
+<li><strong>用于保存“会影响 UI”的状态</strong></li>
+<li><strong>更新会触发组件重新渲染</strong></li>
+<li><strong>值在每次渲染中都是独立的</strong></li>
+</ul>
+<h3 id="⚠️-注意"><a href="#⚠️-注意" class="headerlink" title="⚠️ 注意"></a>⚠️ 注意</h3><ul>
+<li>每次 <code>setCount</code> 都会重新渲染组件。</li>
+<li>不适合存储不会显示在页面上的数据。</li>
+</ul>
+<hr>
+<h2 id="🧠-二、useRef-——-保存引用（不会触发渲染）"><a href="#🧠-二、useRef-——-保存引用（不会触发渲染）" class="headerlink" title="🧠 二、useRef —— 保存引用（不会触发渲染）"></a>🧠 二、<code>useRef</code> —— 保存引用（不会触发渲染）</h2><figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs tsx"><span class="hljs-keyword">const</span> inputRef = useRef&lt;<span class="hljs-title class_">HTMLInputElement</span>&gt;(<span class="hljs-literal">null</span>);<br><br><span class="hljs-keyword">const</span> <span class="hljs-title function_">focusInput</span> = (<span class="hljs-params"></span>) =&gt; &#123;<br>  inputRef.<span class="hljs-property">current</span>?.<span class="hljs-title function_">focus</span>();<br>&#125;;<br><br><span class="hljs-keyword">return</span> (<br>  <span class="language-xml"><span class="hljs-tag">&lt;&gt;</span></span><br><span class="language-xml">    <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">&#123;inputRef&#125;</span> <span class="hljs-attr">placeholder</span>=<span class="hljs-string">&quot;点我聚焦试试&quot;</span> /&gt;</span></span><br><span class="language-xml">    <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">&#123;focusInput&#125;</span>&gt;</span>聚焦输入框<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span></span><br><span class="language-xml">  <span class="hljs-tag">&lt;/&gt;</span></span><br>);<br></code></pre></td></tr></table></figure>
+
+<h3 id="✅-特点-1"><a href="#✅-特点-1" class="headerlink" title="✅ 特点"></a>✅ 特点</h3><ul>
+<li>保存一个<strong>可变的引用值</strong>，跨渲染周期不变。</li>
+<li><strong>修改 <code>.current</code> 不会触发渲染</strong>。</li>
+<li>常用于：<ul>
+<li>访问 DOM 元素（如上例）</li>
+<li>保存上一次的值、定时器 ID 等</li>
+</ul>
+</li>
+</ul>
+<h3 id="⚠️-注意-1"><a href="#⚠️-注意-1" class="headerlink" title="⚠️ 注意"></a>⚠️ 注意</h3><p><code>useRef</code> 是“静态的”，值变化不会更新 UI。</p>
+<hr>
+<h2 id="🚀-三、useMemo-——-性能优化（缓存计算结果）"><a href="#🚀-三、useMemo-——-性能优化（缓存计算结果）" class="headerlink" title="🚀 三、useMemo —— 性能优化（缓存计算结果）"></a>🚀 三、<code>useMemo</code> —— 性能优化（缓存计算结果）</h2><figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs tsx"><span class="hljs-keyword">const</span> expensiveValue = <span class="hljs-title function_">useMemo</span>(<span class="hljs-function">() =&gt;</span> &#123;<br>  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;计算中...&quot;</span>);<br>  <span class="hljs-keyword">return</span> data.<span class="hljs-title function_">filter</span>(<span class="hljs-function"><span class="hljs-params">d</span> =&gt;</span> d.<span class="hljs-property">active</span>).<span class="hljs-property">length</span>;<br>&#125;, [data]);<br></code></pre></td></tr></table></figure>
+
+<h3 id="✅-特点-2"><a href="#✅-特点-2" class="headerlink" title="✅ 特点"></a>✅ 特点</h3><ul>
+<li>缓存“<strong>计算结果</strong>”，避免每次渲染都重复执行。</li>
+<li>仅当依赖项 <code>[data]</code> 变化时才重新计算。</li>
+</ul>
+<h3 id="⚙️-常见用途"><a href="#⚙️-常见用途" class="headerlink" title="⚙️ 常见用途"></a>⚙️ 常见用途</h3><ul>
+<li>计算复杂数据（如排序、过滤）</li>
+<li>避免子组件重复渲染（搭配 <code>React.memo</code>）</li>
+</ul>
+<h3 id="⚠️-注意-2"><a href="#⚠️-注意-2" class="headerlink" title="⚠️ 注意"></a>⚠️ 注意</h3><ul>
+<li><strong>不会保存引用或状态，只缓存结果。</strong></li>
+<li>依赖项一定要写对，否则缓存无效或错误。</li>
+</ul>
+<hr>
+<h2 id="🧭-四、三者对比总结"><a href="#🧭-四、三者对比总结" class="headerlink" title="🧭 四、三者对比总结"></a>🧭 四、三者对比总结</h2><table>
+<thead>
+<tr>
+<th>Hook</th>
+<th>是否触发渲染</th>
+<th>用途</th>
+<th>示例场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>useState</code></td>
+<td>✅ 会</td>
+<td>管理页面状态</td>
+<td>按钮计数、表单输入</td>
+</tr>
+<tr>
+<td><code>useRef</code></td>
+<td>❌ 不会</td>
+<td>保存引用或临时变量</td>
+<td>获取 DOM、保存 timer</td>
+</tr>
+<tr>
+<td><code>useMemo</code></td>
+<td>⚙️ 不会（缓存结果）</td>
+<td>性能优化（避免重复计算）</td>
+<td>过滤、排序、大计算量函数</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="💡-小结"><a href="#💡-小结" class="headerlink" title="💡 小结"></a>💡 小结</h2><ul>
+<li>👉 想“保存数据并更新界面” → <code>useState</code>  </li>
+<li>👉 想“保存数据但不渲染” → <code>useRef</code>  </li>
+<li>👉 想“缓存计算结果” → <code>useMemo</code></li>
+</ul>
+
                 
               </div>
             
@@ -325,8 +403,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>React 学习笔记(四): 变量管理useRef + useMemo + useState</div>
-      <div>http://example.com/2025/10/20/React-学习笔记-四-变量管理useRef-useMemo-useState/</div>
+      <div>React 学习笔记(四): 变量管理 useRef + useMemo + useState</div>
+      <div>http://example.com/2025/09/20/React-学习笔记-四-变量管理useRef-useMemo-useState/</div>
     </div>
     <div class="license-meta">
       
@@ -338,7 +416,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2025年10月20日</div>
+          <div>2025年9月20日</div>
         </div>
       
       
