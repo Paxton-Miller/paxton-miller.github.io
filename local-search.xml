@@ -4,6 +4,19 @@
   
   
   <entry>
+    <title>重温前端三件套(一)：HTML</title>
+    <link href="/2025/11/02/%E9%87%8D%E6%B8%A9%E5%89%8D%E7%AB%AF%E4%B8%89%E4%BB%B6%E5%A5%97-%E4%B8%80-%EF%BC%9AHTML/"/>
+    <url>/2025/11/02/%E9%87%8D%E6%B8%A9%E5%89%8D%E7%AB%AF%E4%B8%89%E4%BB%B6%E5%A5%97-%E4%B8%80-%EF%BC%9AHTML/</url>
+    
+    <content type="html"><![CDATA[<p>HTML标签大小写不敏感，JS&#x2F;TS敏感<br>vue将MyComponent自动转为my-component<br>react自定义组件必须首字母大小写，某则会当作普通html标签处理</p><p>img的src相对路径与绝对路径之分，静态与打包模块化处理（assets）之分、原生html与vue、react区分</p><p>通用属性：<br>href 属性指定链接指向的页面的URL<br>src 属性指定要显示图像的路径<br>width 和 height 属性提供图像宽高信息<br>alt 属性为图像提供备用文本<br>style 属性用于向元素添加样式，例如颜色、字体、大小等<br>lang 属性声明网页的语言<br>title 属性定义了有关元素的一些额外信息</p>]]></content>
+    
+    
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>Linux环回设备(loop device)</title>
     <link href="/2025/11/01/Linux%E7%8E%AF%E5%9B%9E%E8%AE%BE%E5%A4%87loop/"/>
     <url>/2025/11/01/Linux%E7%8E%AF%E5%9B%9E%E8%AE%BE%E5%A4%87loop/</url>
