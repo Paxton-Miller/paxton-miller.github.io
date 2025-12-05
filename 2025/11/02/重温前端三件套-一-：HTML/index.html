@@ -312,7 +312,7 @@ p    {color: red;}
 <p>top window<br> └─ iframe A<br>     └─ iframe B (当前页面)<br>target 值	作用<br>_self	在 iframe B 内打开<br>_parent	在父级 iframe A 内打开<br>_top	跳出所有 iframe，在最外层 top window 打开<br>_blank	新开一个标签页，与 iframe 无关</p>
 <p>对比总结<br>写法	从哪里算起	示例行为<br>xxx（不以 &#x2F; 开头）	当前文件所在目录	同级访问<br>.&#x2F;xxx	当前目录（和上面等价）	同级访问<br>..&#x2F;xxx	上一级目录	回退路径<br>&#x2F;xxx（以 &#x2F; 开头）	网站根目录	和页面文件位置无关<br>如果是在 Vue &#x2F; React 这种构建型项目中，会将网站根目录对应到 public，但那是构建工具行为，不是 HTML 本身的规则。</p>
 <p>网站根目录的定义，nginx：root；服务器默认WebRoot配置</p>
-<p><a><img src="" srcset="/img/loading.gif" lazyload alt="备用文本"></a><br>href&#x3D;”mailto:<a href="mailto:&#x73;&#111;&#x6d;&#101;&#111;&#x6e;&#101;&#64;&#x65;&#120;&#x61;&#x6d;&#112;&#108;&#101;&#x2e;&#x63;&#x6f;&#x6d;">someone@example.com</a>“</p>
+<p><a><img src="" srcset="/img/loading.gif" lazyload alt="备用文本"></a><br>href&#x3D;”mailto:<a href="mailto:&#x73;&#111;&#x6d;&#x65;&#111;&#110;&#x65;&#x40;&#101;&#x78;&#x61;&#x6d;&#112;&#108;&#101;&#x2e;&#x63;&#111;&#x6d;">someone@example.com</a>“</p>
 <p>HTML书签(本质上是跳转到某id属性的元素上)<br><a href="html_demo.html#C4">跳转到第 4 章</a></p>
 <p>图像映射<br><img src="" srcset="/img/loading.gif" lazyload alt="" usemap="#mymap"><br><map name="mymap"><br><area shape="rect" corrds="" href="" onclick=""><br></area><br></map><br>rect - 定义矩形区域<br>circle - 定义圆形区域<br>poly - 定义多边形区域<br>default - 定义整个区域</p>
 <picture>
