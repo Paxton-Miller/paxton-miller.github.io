@@ -1,0 +1,794 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Lingkai Shi">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="内存 4GB&#x3D;4\*2^30\*Byte，即总共2的32次方个二进制位，就需要32位进行编址。  2和3 的区别是，2全链接时全装入内存，即装入时动态链接，3按需，则是运行时动态链接    内存管理 界地址寄存器判断逻辑地址；重定位寄存器判断实际物理地址  32位是指计算机用32二进制位编址，宏直接将值替换为指令 内存空间的扩充ps，还有虚拟存储技术，在后文     内存空间的分配与回收  碎片本">
+<meta property="og:type" content="article">
+<meta property="og:title" content="操作系统第三章：内存">
+<meta property="og:url" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/index.html">
+<meta property="og:site_name" content="码上自由的博客">
+<meta property="og:description" content="内存 4GB&#x3D;4\*2^30\*Byte，即总共2的32次方个二进制位，就需要32位进行编址。  2和3 的区别是，2全链接时全装入内存，即装入时动态链接，3按需，则是运行时动态链接    内存管理 界地址寄存器判断逻辑地址；重定位寄存器判断实际物理地址  32位是指计算机用32二进制位编址，宏直接将值替换为指令 内存空间的扩充ps，还有虚拟存储技术，在后文     内存空间的分配与回收  碎片本">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251212225429.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251212225801.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251212225448.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251212225623.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251212225503.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251212225518.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251212225534.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251213123951.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251214160134.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251214162046.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251214162146.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251214163212.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251214171212.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251214171337.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251216212015.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251218172023.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251218172046.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251218172059.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251218172124.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251218172136.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251218172151.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251218172217.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251218172243.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251218172259.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251219104808.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251219104955.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251219105011.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251219105027.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251219105100.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251219161408.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251219161541.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251219161611.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251219161642.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251219161716.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251226144452.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251226144630.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251226152236.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251226152310.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251226152330.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251226160935.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251226152821.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251226161035.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251226161228.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251226161253.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251226163258.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251226164025.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251226164040.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251226164058.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251226164117.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251226163106.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251230164925.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251230171215.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251230171255.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251230171320.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251230171353.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251230171229.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251230210814.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251230211006.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251230211023.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251230211039.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251230211054.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251230211112.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251231100418.png">
+<meta property="og:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251231102329.png">
+<meta property="article:published_time" content="2025-12-31T07:11:00.000Z">
+<meta property="article:modified_time" content="2025-12-31T07:12:55.208Z">
+<meta property="article:author" content="Lingkai Shi">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251212225429.png">
+  
+  
+  
+  <title>操作系统第三章：内存 - 码上自由的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="/css/demo.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Hello World, Hello Life</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span> </span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span> </span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span> </span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span> </span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span> </span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="操作系统第三章：内存"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-12-31 15:11" pubdate>
+          2025年12月31日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          651 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          6 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">操作系统第三章：内存</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h2 id="内存"><a href="#内存" class="headerlink" title="内存"></a>内存</h2><img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251212225429.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251212225429.png">
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251212225801.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251212225801.png">4GB=4\*2^30\*Byte，即总共2的32次方个二进制位，就需要32位进行编址。
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251212225448.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251212225448.png">
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251212225623.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251212225623.png">2和3 的区别是，2全链接时全装入内存，即装入时动态链接，3按需，则是运行时动态链接
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251212225503.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251212225503.png">
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251212225518.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251212225518.png">
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251212225534.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251212225534.png">
+<h2 id="内存管理"><a href="#内存管理" class="headerlink" title="内存管理"></a>内存管理</h2><img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251213123951.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251213123951.png">
+<p>界地址寄存器判断逻辑地址；重定位寄存器判断实际物理地址</p>
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251214160134.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251214160134.png">
+<p>32位是指计算机用32二进制位编址，宏直接将值替换为指令</p>
+<h3 id="内存空间的扩充"><a href="#内存空间的扩充" class="headerlink" title="内存空间的扩充"></a>内存空间的扩充</h3><p>ps，还有虚拟存储技术，在后文</p>
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251214162046.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251214162046.png">
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251214162146.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251214162146.png">
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251214163212.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251214163212.png">
+
+<h3 id="内存空间的分配与回收"><a href="#内存空间的分配与回收" class="headerlink" title="内存空间的分配与回收"></a>内存空间的分配与回收</h3><img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251214171212.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251214171212.png">
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251214171337.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251214171337.png">
+<p>碎片本质上是不匹配</p>
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251216212015.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251216212015.png">
+<h4 id="为什么高地址的大分区会被“消耗”？——扫描的均匀性导致“保护机制”丧失"><a href="#为什么高地址的大分区会被“消耗”？——扫描的均匀性导致“保护机制”丧失" class="headerlink" title="为什么高地址的大分区会被“消耗”？——扫描的均匀性导致“保护机制”丧失"></a>为什么高地址的大分区会被“消耗”？——扫描的均匀性导致“保护机制”丧失</h4><p>在 First Fit 中，低地址起到了“挡箭牌”的作用。大多数小进程请求在低地址就被消化了，这有效地<strong>保护了高地址的大分区</strong>，使它们能够保持完整，留给后来的特大进程。 而在 Next Fit 中，查找指针一直在向后移动。无论请求的大小，它都会顺着内存地址往后找。这意味着高地址的大分区会被平等地发现并用于满足各种中小型请求。</p>
+<h3 id="基本分页存储管理"><a href="#基本分页存储管理" class="headerlink" title="基本分页存储管理"></a>基本分页存储管理</h3><img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251218172023.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251218172023.png">
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251218172046.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251218172046.png">
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251218172059.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251218172059.png">
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251218172124.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251218172124.png">
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251218172136.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251218172136.png">
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251218172151.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251218172151.png">
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251218172217.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251218172217.png">
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251218172243.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251218172243.png">
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251218172259.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251218172259.png">
+
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251219104808.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251219104808.png">
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251219104955.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251219104955.png">
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251219105011.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251219105011.png">
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251219105027.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251219105027.png">
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251219105100.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251219105100.png">
+
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251219161408.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251219161408.png">
+<p>Cache：高速缓存；访存：访问内存；进程切换自动清理快表</p>
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251219161541.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251219161541.png">
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251219161611.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251219161611.png">
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251219161642.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251219161642.png">
+<p>为什么快表快？</p>
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251219161716.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251219161716.png">
+
+<h3 id="单级页表存在的问题"><a href="#单级页表存在的问题" class="headerlink" title="单级页表存在的问题"></a>单级页表存在的问题</h3><p>最大需要多少字节&#x2F;页框存储页表？<br>假设以下条件：<br>操作系统用32位表示内存地址，页框大小为4KB，页表项长度4B。<br>则页面大小 &#x3D; 4KB &#x3D; 2<sup>12</sup>B，则用12位表示页内地址，剩下20位表示页号。<br>则一个用户进程最多有2<sup>20</sup>个页表项，每个页表项长度4B，总页表长度 &#x3D; 2<sup>22</sup>B，即2<sup>22</sup>&#x2F;2<sup>12</sup>&#x3D;2<sup>10</sup>个页框</p>
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251226144452.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251226144452.png">
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251226144630.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251226144630.png">
+
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251226152236.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251226152236.png">
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251226152310.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251226152310.png">
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251226152330.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251226152330.png">
+
+<h3 id="基本分段存储管理"><a href="#基本分段存储管理" class="headerlink" title="基本分段存储管理"></a>基本分段存储管理</h3><img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251226160935.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251226160935.png">
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251226152821.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251226152821.png">
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251226161035.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251226161035.png">
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251226161228.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251226161228.png">
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251226161253.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251226161253.png">
+
+<h3 id="段页式管理"><a href="#段页式管理" class="headerlink" title="段页式管理"></a>段页式管理</h3><img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251226163258.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251226163258.png">
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251226164025.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251226164025.png">
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251226164040.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251226164040.png"><img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251226164058.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251226164058.png"><img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251226164117.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251226164117.png"><img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251226163106.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251226163106.png">
+<p>思考：为什么分页管理是一维的，分段管理是二维的？段页式管理也是二维的？<br>思考：为什么段表项中不存储段表始址？</p>
+<h2 id="虚拟内存"><a href="#虚拟内存" class="headerlink" title="虚拟内存"></a>虚拟内存</h2><img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251230164925.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251230164925.png">
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251230171215.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251230171215.png">
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251230171255.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251230171255.png">
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251230171320.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251230171320.png">
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251230171353.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251230171353.png">
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251230171229.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251230171229.png">
+
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251230210814.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251230210814.png">
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251230211006.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251230211006.png">
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251230211023.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251230211023.png">
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251230211039.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251230211039.png">
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251230211054.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251230211054.png">
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251230211112.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251230211112.png">
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251231100418.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251231100418.png">
+<p>预调页，调一批</p>
+<img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251231102329.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251231102329.png">
+<p>传统，需要seek、read等指针<br>内存映射文件：操作系统负责读写，多个进程可以通过自己的虚拟地址空间，通过页表对应实际的物理内存<br>需要注意的是，操作系统并不是真的创建了一大批占用内存的空间，虚拟地址空间只是记了一笔账，真正读写时通过页表记录实际的物理内存块</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>操作系统第三章：内存</div>
+      <div>http://example.com/2025/12/31/操作系统第三章：内存/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Lingkai Shi</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年12月31日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/12/12/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%8C%E7%AB%A0%EF%BC%9A%E5%90%8C%E6%AD%A5%E3%80%81%E4%BA%92%E6%96%A5%E3%80%81%E6%AD%BB%E9%94%81/" title="操作系统第二章：同步、互斥、死锁">
+                        <span class="hidden-mobile">操作系统第二章：同步、互斥、死锁</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  
+  
+    <article id="comments" lazyload>
+      
+  <div id="valine"></div>
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#valine', function() {
+      Fluid.utils.createScript('https://lib.baomitu.com/valine/1.5.1/Valine.min.js', function() {
+        var options = Object.assign(
+          {"appId":"UI6r4jx4Fi5JCbcprPm3mTAh-MdYXbMMI","appKey":"wdCPROJ2afmmDwNeZCaOUodT","path":"window.location.pathname","placeholder":"来都来了，不留下点什么吗？","avatar":"retro","meta":["nick","mail","link"],"requiredFields":[],"pageSize":10,"lang":"zh-CN","highlight":true,"recordIP":false,"serverURLs":"https://ui6r4jx4.api.lncldglobal.com","emojiCDN":null,"emojiMaps":null,"enableQQ":true},
+          {
+            el: "#valine",
+            path: window.location.pathname
+          }
+        )
+        new Valine(options);
+        Fluid.utils.waitElementVisible('#valine .vcontent', () => {
+          var imgSelector = '#valine .vcontent img:not(.vemoji)';
+          Fluid.plugins.imageCaption(imgSelector);
+          Fluid.plugins.fancyBox(imgSelector);
+        })
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+    </article>
+  
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <i class="iconfont icon-brush"></i> <span>To Freedom, With Ink.</span> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+  <script type="text/javascript"
+  color="220,220,220" opacity='0.7' zIndex="-2" count="200" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js">
+  </script>
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
