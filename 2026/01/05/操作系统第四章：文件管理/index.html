@@ -1,0 +1,916 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Lingkai Shi">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="初识文件管理 磁盘块   文件的逻辑结构       文件目录 无环图目录结构的应用：硬链接  FCB&#x2F;目录项  当前目录&#x2F;根目录的磁盘IO对比   磁盘IO次数对比，文件检索速度更加快捷（索引节点调入内存、外存索引节点、内存索引节点）  需要时从外存调指定目录项的索引结点 文件物理结构注意页号和内存块号的区别，类比文件的逻辑块和物理块   Q：怎么把逻辑块号转换为物理块号？">
+<meta property="og:type" content="article">
+<meta property="og:title" content="操作系统第四章：文件管理">
+<meta property="og:url" content="http://example.com/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/index.html">
+<meta property="og:site_name" content="码上自由的博客">
+<meta property="og:description" content="初识文件管理 磁盘块   文件的逻辑结构       文件目录 无环图目录结构的应用：硬链接  FCB&#x2F;目录项  当前目录&#x2F;根目录的磁盘IO对比   磁盘IO次数对比，文件检索速度更加快捷（索引节点调入内存、外存索引节点、内存索引节点）  需要时从外存调指定目录项的索引结点 文件物理结构注意页号和内存块号的区别，类比文件的逻辑块和物理块   Q：怎么把逻辑块号转换为物理块号？">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.hswstatic.com/gif/computer-operating-sytem.jpg">
+<meta property="article:published_time" content="2026-01-05T14:28:35.000Z">
+<meta property="article:modified_time" content="2026-01-05T14:28:53.650Z">
+<meta property="article:author" content="Lingkai Shi">
+<meta property="article:tag" content="八股文">
+<meta property="article:tag" content="操作系统">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://cdn.hswstatic.com/gif/computer-operating-sytem.jpg">
+  
+  
+  
+  <title>操作系统第四章：文件管理 - 码上自由的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="/css/demo.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Hello World, Hello Life</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span> </span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span> </span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span> </span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span> </span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span> </span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="操作系统第四章：文件管理"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-01-05 22:28" pubdate>
+          2026年1月5日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          1.8k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          15 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">操作系统第四章：文件管理</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h2 id="初识文件管理"><a href="#初识文件管理" class="headerlink" title="初识文件管理"></a>初识文件管理</h2><img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260104095912.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260104095912.png">
+<p>磁盘块</p>
+<img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260104113057.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260104113057.png">
+
+<h2 id="文件的逻辑结构"><a href="#文件的逻辑结构" class="headerlink" title="文件的逻辑结构"></a>文件的逻辑结构</h2><img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260104103654.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260104103654.png">
+<img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260104103516.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260104103516.png">
+<img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260104103821.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260104103821.png">
+<img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260104103934.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260104103934.png">
+<img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260104103952.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260104103952.png">
+<img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260104104200.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260104104200.png">
+
+<h2 id="文件目录"><a href="#文件目录" class="headerlink" title="文件目录"></a>文件目录</h2><img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260104112307.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260104112307.png">
+<p>无环图目录结构的应用：硬链接</p>
+<img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260104112518.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260104112518.png">
+<p>FCB&#x2F;目录项</p>
+<img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260104112604.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260104112604.png">
+<p>当前目录&#x2F;根目录的磁盘IO对比</p>
+<img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260104112637.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260104112637.png">
+<img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260104112837.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260104112837.png">
+<p>磁盘IO次数对比，文件检索速度更加快捷（索引节点调入内存、外存索引节点、内存索引节点）</p>
+<img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260104112933.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260104112933.png">
+<p>需要时从外存调指定目录项的索引结点</p>
+<h2 id="文件物理结构"><a href="#文件物理结构" class="headerlink" title="文件物理结构"></a>文件物理结构</h2><p>注意页号和内存块号的区别，类比文件的逻辑块和物理块</p>
+<img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260104155305.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260104155305.png">
+
+<p>Q：怎么把逻辑块号转换为物理块号？</p>
+<h3 id="连续分配方式"><a href="#连续分配方式" class="headerlink" title="连续分配方式"></a>连续分配方式</h3><img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260104155356.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260104155356.png">
+<img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260104155455.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260104155455.png">
+<p>为什么顺序访问速度最快？因为磁头（？）移动间隔很小，开小很小</p>
+<h3 id="链接分配方式"><a href="#链接分配方式" class="headerlink" title="链接分配方式"></a>链接分配方式</h3><img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260104155610.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260104155610.png">
+<img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260104155740.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260104155740.png">
+<img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260104155814.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260104155814.png">
+<img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260104155823.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260104155823.png">
+<h4 id="0-随机访问与顺序访问"><a href="#0-随机访问与顺序访问" class="headerlink" title="0.随机访问与顺序访问"></a>0.随机访问与顺序访问</h4><p>随机访问：物理地址&#x3D;起始地址+(逻辑索引×元素大小)</p>
+<p>虽然显式链接（如 FAT 文件系统）在理论数据结构上仍然是“链表”（意味着你需要顺藤摸瓜），但由于这个链表被提取出来单独存放在<strong>内存</strong>中，因此在实际效果上，它实现了（近似的）随机访问。</p>
+<h4 id="1-隐式链接（普通链表）：必须读盘才能找到路"><a href="#1-隐式链接（普通链表）：必须读盘才能找到路" class="headerlink" title="1. 隐式链接（普通链表）：必须读盘才能找到路"></a>1. 隐式链接（普通链表）：必须读盘才能找到路</h4><p>在隐式链接中，指向下一个块的指针是<strong>存储在数据块内部的</strong>。</p>
+<ul>
+<li><p><strong>场景：</strong> 你要读取文件的第 100 个块。</p>
+</li>
+<li><p><strong>过程：</strong></p>
+<ol>
+<li><p>读取第 1 块（磁盘 I&#x2F;O），在末尾拿到第 2 块的地址。</p>
+</li>
+<li><p>读取第 2 块（磁盘 I&#x2F;O），在末尾拿到第 3 块的地址。</p>
+</li>
+<li><p>…</p>
+</li>
+<li><p>读取第 99 块（磁盘 I&#x2F;O），在末尾拿到第 100 块的地址。</p>
+</li>
+<li><p>读取第 100 块。</p>
+</li>
+</ol>
+</li>
+<li><p><strong>代价：</strong> 你为了找到第 100 块，被迫进行了 99 次<strong>磁盘读操作</strong>。</p>
+</li>
+<li><p><strong>结论：</strong> 极其缓慢，完全不支持随机访问。</p>
+</li>
+</ul>
+<h4 id="2-显式链接（FAT）：地图在内存里"><a href="#2-显式链接（FAT）：地图在内存里" class="headerlink" title="2. 显式链接（FAT）：地图在内存里"></a>2. 显式链接（FAT）：地图在内存里</h4><p>在显式链接中，所有的指针被提取出来，存放在一张集中的表中（FAT表，File Allocation Table）。<strong>关键点在于：系统启动时，这张表通常会被加载到内存中。</strong></p>
+<ul>
+<li><p><strong>场景：</strong> 你还是要读取文件的第 100 个块。</p>
+</li>
+<li><p><strong>过程：</strong></p>
+<ol>
+<li><p>CPU 在<strong>内存</strong>中的 FAT 表里查看：<code>Entry[1]</code> 指向 5。</p>
+</li>
+<li><p>CPU 继续在<strong>内存</strong>里看：<code>Entry[5]</code> 指向 12…</p>
+</li>
+<li><p>CPU 瞬间在<strong>内存</strong>里遍历完这 99 个节点的链条，找到了第 100 块的物理地址是 888。</p>
+</li>
+<li><p><strong>直接驱动磁头去读取物理块 888。</strong></p>
+</li>
+</ol>
+</li>
+<li><p><strong>代价：</strong> 99 次<strong>内存访问</strong> + 1 次<strong>磁盘读操作</strong>。</p>
+</li>
+<li><p><strong>结论：</strong></p>
+<ul>
+<li><p>内存访问的速度是纳秒级（ns）。</p>
+</li>
+<li><p>磁盘访问的速度是毫秒级（ms）。</p>
+</li>
+<li><p>两者相差几十万倍。</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="索引分配方式"><a href="#索引分配方式" class="headerlink" title="索引分配方式"></a>索引分配方式</h3><img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260104165809.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260104165809.png">
+<img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260104170226.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260104170226.png">
+<img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260104170306.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260104170306.png">
+<img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260104170354.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260104170354.png">
+<img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260104170416.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260104170416.png">
+<img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260104165955.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260104165955.png">
+
+<h2 id="逻辑结构VS物理结构"><a href="#逻辑结构VS物理结构" class="headerlink" title="逻辑结构VS物理结构"></a>逻辑结构VS物理结构</h2><img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260105144350.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260105144350.png">
+<p>两个典型例子：<br>逻辑上顺序文件的链式存储在物理上用连续&#x2F;链接&#x2F;索引分配</p>
+<img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260105144753.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260105144753.png">
+<p>逻辑上索引文件在物理上用索引分配</p>
+<img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260105144833.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260105144833.png">
+<img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260105144513.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260105144513.png"><img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260105144524.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260105144524.png"><img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260105144539.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260105144539.png">
+
+<h2 id="文件存储空间管理"><a href="#文件存储空间管理" class="headerlink" title="文件存储空间管理"></a>文件存储空间管理</h2><img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260105155047.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260105155047.png">
+<img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260105155858.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260105155858.png">
+<img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260105155917.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260105155917.png">
+<img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260105155937.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260105155937.png">
+<img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260105160216.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260105160216.png">
+<img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260105160619.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260105160619.png">
+<img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260105160645.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260105160645.png">
+<img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260105160718.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260105160718.png">
+<p>成组链接超级块常驻内存，怎么进行回收和分配？<br>分配：分配1块，直接切出去201号磁盘块，100变为99<br>分配100块，切出整个超级块，把块号300对应的分组拷贝到超级块中<br>回收：假设上限100，现在回收1块，新增一个分组作为超级块，第一个指向老的超级块，第二个是新的回收的1块</p>
+<h2 id="文件的基本操作"><a href="#文件的基本操作" class="headerlink" title="文件的基本操作"></a>文件的基本操作</h2><img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260105165654.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260105165654.png">
+
+<h2 id="文件共享"><a href="#文件共享" class="headerlink" title="文件共享"></a>文件共享</h2><img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260105165933.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260105165933.png">
+<img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260105170233.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260105170233.png">
+
+<h2 id="文件保护"><a href="#文件保护" class="headerlink" title="文件保护"></a>文件保护</h2><img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260105170940.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260105170940.png">
+
+<h2 id="文件系统的层次结构"><a href="#文件系统的层次结构" class="headerlink" title="文件系统的层次结构"></a>文件系统的层次结构</h2><img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260105171345.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260105171345.png">
+
+<h2 id="文件系统布局"><a href="#文件系统布局" class="headerlink" title="文件系统布局"></a>文件系统布局</h2><img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260105215327.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260105215327.png">
+<img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260105215357.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260105215357.png">
+<img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260105215542.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260105215542.png">
+<p>文件句柄可以理解为读写时的指针，文件记录号&#x2F;文件描述符</p>
+<h2 id="虚拟文件系统VFS"><a href="#虚拟文件系统VFS" class="headerlink" title="虚拟文件系统VFS"></a>虚拟文件系统VFS</h2><img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260105221452.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260105221452.png">
+<img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260105221506.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260105221506.png">
+<img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260105221528.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260105221528.png">
+<img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260105221548.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260105221548.png">
+<img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260105221623.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260105221623.png">
+
+<h2 id="文件系统对比"><a href="#文件系统对比" class="headerlink" title="文件系统对比"></a>文件系统对比</h2><p>我们可以把文件系统分为三类：<strong>本地家政（管理硬盘）</strong>、<strong>远程快递（跨网传输）</strong>、<strong>逻辑叠罗汉（容器专用）</strong>。</p>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>文件系统</th>
+<th>主要角色</th>
+<th>核心特点</th>
+<th>缺点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>本地</strong></td>
+<td><strong>EXT4</strong></td>
+<td>Linux 标准版</td>
+<td>极其稳定，万金油，兼容性好。</td>
+<td>大规模并发下性能不如 XFS。</td>
+</tr>
+<tr>
+<td><strong>本地</strong></td>
+<td><strong>XFS</strong></td>
+<td>Linux 企业版</td>
+<td>擅长高并发、海量小文件，Docker 官方最推荐。</td>
+<td>缩减容量（shrink）非常困难。</td>
+</tr>
+<tr>
+<td><strong>本地</strong></td>
+<td><strong>NTFS</strong></td>
+<td>Windows 专用</td>
+<td>权限控制极其精细，带日志恢复。</td>
+<td>Linux 挂载时性能一般，协议不透明。</td>
+</tr>
+<tr>
+<td><strong>硬件</strong></td>
+<td><strong>UFS</strong></td>
+<td>移动端&#x2F;嵌入式</td>
+<td><strong>手机闪存</strong>的主流标准，读写延迟极低，省电。</td>
+<td>主要是硬件接口协议，不适合服务器。</td>
+</tr>
+<tr>
+<td><strong>网络</strong></td>
+<td><strong>NFS</strong></td>
+<td>远程共享</td>
+<td>像文件夹一样挂载远程服务器，配置极简。</td>
+<td>依赖网络，<strong>不支持硬链接和原子操作</strong>。</td>
+</tr>
+<tr>
+<td><strong>逻辑</strong></td>
+<td><strong>Overlay2</strong></td>
+<td>Docker 引擎</td>
+<td><strong>不直接存数据</strong>，而是把上面的系统“叠”起来看。</td>
+<td>必须跑在支持它的本地系统（EXT4&#x2F;XFS）上。</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="它们之间的“套娃”关系"><a href="#它们之间的“套娃”关系" class="headerlink" title="它们之间的“套娃”关系"></a>它们之间的“套娃”关系</h3><p>在 Docker 的实际运行中，这些系统是<strong>层级协作</strong>的，而不是互相替代。</p>
+<ol>
+<li><p><strong>最底层（物理层）</strong>：比如你的手机存储芯片走的是 <strong>UFS</strong> 协议，或者服务器硬盘格式化成了 <strong>XFS</strong>。</p>
+</li>
+<li><p><strong>中间层（宿主层）</strong>：Linux 内核通过 <strong>VFS</strong> 识别出这是一块 XFS 硬盘。</p>
+</li>
+<li><p><strong>应用层（Docker 层）</strong>：Docker 启动 <strong>Overlay2</strong> 驱动，在 XFS 的某个文件夹里开始“叠罗汉”（层级镜像）。</p>
+</li>
+<li><p><strong>数据层（挂载层）</strong>：如果你想让容器里的数据存到另一台机器，你会通过 <strong>NFS</strong> 挂载一个远程目录。</p>
+</li>
+</ol>
+<hr>
+<h2 id="不建议在-NFS-上运行-Overlay2-的原因："><a href="#不建议在-NFS-上运行-Overlay2-的原因：" class="headerlink" title="不建议在 NFS 上运行 Overlay2 的原因："></a>不建议在 NFS 上运行 Overlay2 的原因：</h2><h3 id="1-硬链接（Hard-Link）的一致性问题"><a href="#1-硬链接（Hard-Link）的一致性问题" class="headerlink" title="1. 硬链接（Hard Link）的一致性问题"></a>1. 硬链接（Hard Link）的一致性问题</h3><p>Overlay2 在处理镜像层（Layers）时，大量使用了<strong>硬链接</strong>来节省空间和提高效率。</p>
+<ul>
+<li><strong>NFS 的局限</strong>：在网络环境下，保证跨节点的硬链接一致性非常困难。如果网络出现抖动，NFS 客户端和服务器之间关于硬链接计数的同步可能出错，导致 Docker 镜像层损坏。</li>
+</ul>
+<h3 id="2-Copy-on-Write-CoW-的性能极差"><a href="#2-Copy-on-Write-CoW-的性能极差" class="headerlink" title="2. Copy-on-Write (CoW) 的性能极差"></a>2. Copy-on-Write (CoW) 的性能极差</h3><p>当容器修改镜像中的文件时，Overlay2 会执行“写时复制”操作：将文件从低层（LowerDir）拷贝到高层（UpperDir）。</p>
+<ul>
+<li><strong>网络开销</strong>：在本地磁盘（如 EXT4&#x2F;XFS）上，这只是毫秒级的操作。但在 NFS 上，这意味着大量的小文件读写请求要通过网络往返，<strong>延迟（Latency）会放大几十倍</strong>。</li>
+</ul>
+<h3 id="3-POSIX-兼容性与原子性"><a href="#3-POSIX-兼容性与原子性" class="headerlink" title="3. POSIX 兼容性与原子性"></a>3. POSIX 兼容性与原子性</h3><p>POSIX是Linux VFS的特性<br>Overlay2 依赖于底层文件系统的某些高级 POSIX 特性，例如 <code>whiteout</code>（白点文件，用于标记删除）。</p>
+<ul>
+<li><strong>不完整支持</strong>：许多 NFS 配置（尤其是旧版本或非标准的 NAS 设备）对 POSIX 特性的支持并不完美。这会导致 Docker 在删除文件或合并层时出现不可预知的报错，最常见的表现就是容器启动时提示 <code>storage driver overlay2: failed to...</code>。</li>
+</ul>
+<hr>
+<h3 id="4-常见的架构对比"><a href="#4-常见的架构对比" class="headerlink" title="4. 常见的架构对比"></a>4. 常见的架构对比</h3><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>本地文件系统 (EXT4&#x2F;XFS)</th>
+<th>网络文件系统 (NFS)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>访问速度</strong></td>
+<td><strong>极快</strong> (直接访问内存&#x2F;总线)</td>
+<td><strong>慢</strong> (受限于带宽和网络延迟)</td>
+</tr>
+<tr>
+<td><strong>原子性保证</strong></td>
+<td>强 (内核层面保证)</td>
+<td>弱 (受网络同步机制影响)</td>
+</tr>
+<tr>
+<td><strong>Overlay2 兼容性</strong></td>
+<td><strong>完美原生支持</strong></td>
+<td><strong>极其不稳定，经常报错</strong></td>
+</tr>
+</tbody></table>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E5%85%AB%E8%82%A1%E6%96%87/" class="category-chain-item">八股文</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E5%85%AB%E8%82%A1%E6%96%87/" class="print-no-link">#八股文</a>
+      
+        <a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" class="print-no-link">#操作系统</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>操作系统第四章：文件管理</div>
+      <div>http://example.com/2026/01/05/操作系统第四章：文件管理/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Lingkai Shi</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年1月5日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/" title="操作系统第三章：内存">
+                        <span class="hidden-mobile">操作系统第三章：内存</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  
+  
+    <article id="comments" lazyload>
+      
+  <div id="valine"></div>
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#valine', function() {
+      Fluid.utils.createScript('https://lib.baomitu.com/valine/1.5.1/Valine.min.js', function() {
+        var options = Object.assign(
+          {"appId":"UI6r4jx4Fi5JCbcprPm3mTAh-MdYXbMMI","appKey":"wdCPROJ2afmmDwNeZCaOUodT","path":"window.location.pathname","placeholder":"来都来了，不留下点什么吗？","avatar":"retro","meta":["nick","mail","link"],"requiredFields":[],"pageSize":10,"lang":"zh-CN","highlight":true,"recordIP":false,"serverURLs":"https://ui6r4jx4.api.lncldglobal.com","emojiCDN":null,"emojiMaps":null,"enableQQ":true},
+          {
+            el: "#valine",
+            path: window.location.pathname
+          }
+        )
+        new Valine(options);
+        Fluid.utils.waitElementVisible('#valine .vcontent', () => {
+          var imgSelector = '#valine .vcontent img:not(.vemoji)';
+          Fluid.plugins.imageCaption(imgSelector);
+          Fluid.plugins.fancyBox(imgSelector);
+        })
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+    </article>
+  
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <i class="iconfont icon-brush"></i> <span>To Freedom, With Ink.</span> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+  <script type="text/javascript"
+  color="220,220,220" opacity='0.7' zIndex="-2" count="200" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js">
+  </script>
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
