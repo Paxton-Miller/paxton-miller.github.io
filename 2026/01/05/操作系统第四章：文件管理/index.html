@@ -19,16 +19,16 @@
   <meta name="author" content="Lingkai Shi">
   <meta name="keywords" content="">
   
-    <meta name="description" content="初识文件管理 磁盘块   文件的逻辑结构       文件目录 无环图目录结构的应用：硬链接  FCB&#x2F;目录项  当前目录&#x2F;根目录的磁盘IO对比   磁盘IO次数对比，文件检索速度更加快捷（索引节点调入内存、外存索引节点、内存索引节点）  需要时从外存调指定目录项的索引结点 文件物理结构注意页号和内存块号的区别，类比文件的逻辑块和物理块   Q：怎么把逻辑块号转换为物理块号？">
+    <meta name="description" content="学完本章需要回答的几个问题？ 文件的逻辑结构？ 文件目录实现、结构分类、索引结点？ 文件的物理结构？ 文件的存储空间管理方法？ 文件的基本操作？ 文件共享 文件保护 文件系统的层次结构？ 文件系统布局？ VFS、文件系统挂载、文件系统对比  初识文件管理 磁盘块   文件的逻辑结构       文件目录 无环图目录结构的应用：硬链接  FCB&#x2F;目录项  当前目录&#x2F;根目录的磁盘I">
 <meta property="og:type" content="article">
 <meta property="og:title" content="操作系统第四章：文件管理">
 <meta property="og:url" content="http://example.com/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/index.html">
 <meta property="og:site_name" content="码上自由的博客">
-<meta property="og:description" content="初识文件管理 磁盘块   文件的逻辑结构       文件目录 无环图目录结构的应用：硬链接  FCB&#x2F;目录项  当前目录&#x2F;根目录的磁盘IO对比   磁盘IO次数对比，文件检索速度更加快捷（索引节点调入内存、外存索引节点、内存索引节点）  需要时从外存调指定目录项的索引结点 文件物理结构注意页号和内存块号的区别，类比文件的逻辑块和物理块   Q：怎么把逻辑块号转换为物理块号？">
+<meta property="og:description" content="学完本章需要回答的几个问题？ 文件的逻辑结构？ 文件目录实现、结构分类、索引结点？ 文件的物理结构？ 文件的存储空间管理方法？ 文件的基本操作？ 文件共享 文件保护 文件系统的层次结构？ 文件系统布局？ VFS、文件系统挂载、文件系统对比  初识文件管理 磁盘块   文件的逻辑结构       文件目录 无环图目录结构的应用：硬链接  FCB&#x2F;目录项  当前目录&#x2F;根目录的磁盘I">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://cdn.hswstatic.com/gif/computer-operating-sytem.jpg">
 <meta property="article:published_time" content="2026-01-05T14:28:35.000Z">
-<meta property="article:modified_time" content="2026-01-05T14:28:53.650Z">
+<meta property="article:modified_time" content="2026-01-17T08:45:18.121Z">
 <meta property="article:author" content="Lingkai Shi">
 <meta property="article:tag" content="操作系统">
 <meta property="article:tag" content="八股文">
@@ -241,7 +241,7 @@
         
         
         
-          15 分钟
+          16 分钟
         
       </span>
     
@@ -283,7 +283,19 @@
             
               <div class="markdown-body">
                 
-                <h2 id="初识文件管理"><a href="#初识文件管理" class="headerlink" title="初识文件管理"></a>初识文件管理</h2><img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260104095912.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260104095912.png">
+                <h1 id="学完本章需要回答的几个问题？"><a href="#学完本章需要回答的几个问题？" class="headerlink" title="学完本章需要回答的几个问题？"></a>学完本章需要回答的几个问题？</h1><ul>
+<li>文件的逻辑结构？</li>
+<li>文件目录实现、结构分类、索引结点？</li>
+<li>文件的物理结构？</li>
+<li>文件的存储空间管理方法？</li>
+<li>文件的基本操作？</li>
+<li>文件共享</li>
+<li>文件保护</li>
+<li>文件系统的层次结构？</li>
+<li>文件系统布局？</li>
+<li>VFS、文件系统挂载、文件系统对比</li>
+</ul>
+<h2 id="初识文件管理"><a href="#初识文件管理" class="headerlink" title="初识文件管理"></a>初识文件管理</h2><img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260104095912.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260104095912.png">
 <p>磁盘块</p>
 <img src="/2026/01/05/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/Pasted%20image%2020260104113057.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260104113057.png">
 

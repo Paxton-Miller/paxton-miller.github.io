@@ -19,16 +19,16 @@
   <meta name="author" content="Lingkai Shi">
   <meta name="keywords" content="">
   
-    <meta name="description" content="作业&#x2F;内存&#x2F;进程的调度  狭义调度：选进程；广义调度：选进程并切换  闲逛进程：没事干，CPU得有事情干。优先级最低，每个指令周期末尾会检查中断，如果有中断，即唤醒调度程序外中断只在“指令执行完后”检查一次。内中断在“指令执行过程中随时可能触发”，并不需要等待指令执行完。 调度算法调度算法指标  批处理系统调度算法      交互式系统调度算法">
+    <meta name="description" content="学完本章需要回答的问题？ 处理机三层调度对比？ 临界区与临界资源？ 进程调度的时机？ 调度算法指标有哪些？ 批处理系统调度算法、交互式系统调度算法？调度的时机？是否可抢占、导致饥饿？ 多处理机调度的目标以及方案对比？  作业&#x2F;内存&#x2F;进程的调度  狭义调度：选进程；广义调度：选进程并切换  闲逛进程：没事干，CPU得有事情干。优先级最低，每个指令周期末尾会检查中断，如果有中断，即">
 <meta property="og:type" content="article">
 <meta property="og:title" content="操作系统第二章：调度">
 <meta property="og:url" content="http://example.com/2025/12/12/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%8C%E7%AB%A0%EF%BC%9A%E8%B0%83%E5%BA%A6/index.html">
 <meta property="og:site_name" content="码上自由的博客">
-<meta property="og:description" content="作业&#x2F;内存&#x2F;进程的调度  狭义调度：选进程；广义调度：选进程并切换  闲逛进程：没事干，CPU得有事情干。优先级最低，每个指令周期末尾会检查中断，如果有中断，即唤醒调度程序外中断只在“指令执行完后”检查一次。内中断在“指令执行过程中随时可能触发”，并不需要等待指令执行完。 调度算法调度算法指标  批处理系统调度算法      交互式系统调度算法">
+<meta property="og:description" content="学完本章需要回答的问题？ 处理机三层调度对比？ 临界区与临界资源？ 进程调度的时机？ 调度算法指标有哪些？ 批处理系统调度算法、交互式系统调度算法？调度的时机？是否可抢占、导致饥饿？ 多处理机调度的目标以及方案对比？  作业&#x2F;内存&#x2F;进程的调度  狭义调度：选进程；广义调度：选进程并切换  闲逛进程：没事干，CPU得有事情干。优先级最低，每个指令周期末尾会检查中断，如果有中断，即">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://cdn.hswstatic.com/gif/computer-operating-sytem.jpg">
 <meta property="article:published_time" content="2025-12-12T01:47:24.000Z">
-<meta property="article:modified_time" content="2025-12-12T01:48:34.176Z">
+<meta property="article:modified_time" content="2026-01-15T03:22:49.399Z">
 <meta property="article:author" content="Lingkai Shi">
 <meta property="article:tag" content="操作系统">
 <meta property="article:tag" content="八股文">
@@ -230,7 +230,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          142 字
+          298 字
         
       </span>
     
@@ -241,7 +241,7 @@
         
         
         
-          2 分钟
+          3 分钟
         
       </span>
     
@@ -283,11 +283,19 @@
             
               <div class="markdown-body">
                 
-                <h2 id="作业-内存-进程的调度"><a href="#作业-内存-进程的调度" class="headerlink" title="作业&#x2F;内存&#x2F;进程的调度"></a>作业&#x2F;内存&#x2F;进程的调度</h2><img src="/2025/12/12/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%8C%E7%AB%A0%EF%BC%9A%E8%B0%83%E5%BA%A6/Pasted%20image%2020251208203938.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251208203938.png">
+                <h1 id="学完本章需要回答的问题？"><a href="#学完本章需要回答的问题？" class="headerlink" title="学完本章需要回答的问题？"></a>学完本章需要回答的问题？</h1><ul>
+<li>处理机三层调度对比？</li>
+<li>临界区与临界资源？</li>
+<li>进程调度的时机？</li>
+<li>调度算法指标有哪些？</li>
+<li>批处理系统调度算法、交互式系统调度算法？调度的时机？是否可抢占、导致饥饿？</li>
+<li>多处理机调度的目标以及方案对比？</li>
+</ul>
+<h2 id="作业-内存-进程的调度"><a href="#作业-内存-进程的调度" class="headerlink" title="作业&#x2F;内存&#x2F;进程的调度"></a>作业&#x2F;内存&#x2F;进程的调度</h2><img src="/2025/12/12/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%8C%E7%AB%A0%EF%BC%9A%E8%B0%83%E5%BA%A6/Pasted%20image%2020251208203938.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251208203938.png">
 <img src="/2025/12/12/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%8C%E7%AB%A0%EF%BC%9A%E8%B0%83%E5%BA%A6/Pasted%20image%2020251208210042.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251208210042.png">
 <img src="/2025/12/12/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%8C%E7%AB%A0%EF%BC%9A%E8%B0%83%E5%BA%A6/Pasted%20image%2020251208210100.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251208210100.png">狭义调度：选进程；广义调度：选进程并切换
 <img src="/2025/12/12/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%8C%E7%AB%A0%EF%BC%9A%E8%B0%83%E5%BA%A6/Pasted%20image%2020251208212923.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251208212923.png">
-<p>闲逛进程：没事干，CPU得有事情干。优先级最低，每个指令周期末尾会检查中断，如果有中断，即唤醒调度程序<br><strong>外中断只在“指令执行完后”检查一次。</strong><br><strong>内中断在“指令执行过程中随时可能触发”，并不需要等待指令执行完。</strong></p>
+<p>闲逛进程：没事干，CPU得有事情干。优先级最低，每个指令周期末尾会检查中断，如果有中断，即唤醒调度程序<br><strong>外中断只在“指令执行完后”检查一次。</strong><br><strong>内中断在“指令执行过程中随时可能触发”，并不需要等待指令执行完。</strong><br>在非抢占式系统中，即使发生了中断，处理完后通常会直接返回原进程，除非原进程主动放弃 CPU。因此中断并不一定引发调度程序。<br>只有中断才能触发调度程序</p>
 <h2 id="调度算法"><a href="#调度算法" class="headerlink" title="调度算法"></a>调度算法</h2><h3 id="调度算法指标"><a href="#调度算法指标" class="headerlink" title="调度算法指标"></a>调度算法指标</h3><img src="/2025/12/12/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%8C%E7%AB%A0%EF%BC%9A%E8%B0%83%E5%BA%A6/Pasted%20image%2020251208221902.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251208221902.png">
 <img src="/2025/12/12/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%8C%E7%AB%A0%EF%BC%9A%E8%B0%83%E5%BA%A6/Pasted%20image%2020251208222026.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251208222026.png">
 <h3 id="批处理系统调度算法"><a href="#批处理系统调度算法" class="headerlink" title="批处理系统调度算法"></a>批处理系统调度算法</h3><img src="/2025/12/12/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%8C%E7%AB%A0%EF%BC%9A%E8%B0%83%E5%BA%A6/Pasted%20image%2020251209225023.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251209225023.png">
