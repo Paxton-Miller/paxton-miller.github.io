@@ -19,19 +19,19 @@
   <meta name="author" content="Lingkai Shi">
   <meta name="keywords" content="">
   
-    <meta name="description" content="IO控制器     为什么要给IO控制器中的寄存器编址？IO设备的电子部件称为IO控制器，IO控制器中有多种寄存器，这些寄存器可以通过编址让CPU统一操作设备。CPU又有寄存器、高速缓存、乱序执行等机制，保证了它能在某种程度上高速与内存交互。 IO控制方式   由于寄存器限制，一次中断对应一个字的传输。需要注意的是，中断处理程序就是负责搬数据的，这个跟进程阻塞时保护现场本质上是不一样的。  虽">
+    <meta name="description" content="学完本章需要回答的几个问题？ IO控制器主要功能、组成、两种寄存器编址方式 IO控制方式 IO软件层次结构、输入输出应用程序接口、阻塞IO&#x2F;非阻塞IO IO核心子系统 假脱机技术 设备的分配与回收 缓冲区管理 磁盘结构、调度算法、减少磁盘延迟方法 磁盘管理、固态硬盘SSD    IO控制器     为什么要给IO控制器中的寄存器编址？IO设备的电子部件称为IO控制器，IO控制器中有多种寄">
 <meta property="og:type" content="article">
 <meta property="og:title" content="操作系统第五章：磁盘与设备管理">
 <meta property="og:url" content="http://example.com/2026/01/10/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%94%E7%AB%A0%EF%BC%9A%E7%A3%81%E7%9B%98%E4%B8%8E%E8%AE%BE%E5%A4%87%E7%AE%A1%E7%90%86/index.html">
 <meta property="og:site_name" content="码上自由的博客">
-<meta property="og:description" content="IO控制器     为什么要给IO控制器中的寄存器编址？IO设备的电子部件称为IO控制器，IO控制器中有多种寄存器，这些寄存器可以通过编址让CPU统一操作设备。CPU又有寄存器、高速缓存、乱序执行等机制，保证了它能在某种程度上高速与内存交互。 IO控制方式   由于寄存器限制，一次中断对应一个字的传输。需要注意的是，中断处理程序就是负责搬数据的，这个跟进程阻塞时保护现场本质上是不一样的。  虽">
+<meta property="og:description" content="学完本章需要回答的几个问题？ IO控制器主要功能、组成、两种寄存器编址方式 IO控制方式 IO软件层次结构、输入输出应用程序接口、阻塞IO&#x2F;非阻塞IO IO核心子系统 假脱机技术 设备的分配与回收 缓冲区管理 磁盘结构、调度算法、减少磁盘延迟方法 磁盘管理、固态硬盘SSD    IO控制器     为什么要给IO控制器中的寄存器编址？IO设备的电子部件称为IO控制器，IO控制器中有多种寄">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://cdn.hswstatic.com/gif/computer-operating-sytem.jpg">
 <meta property="article:published_time" content="2026-01-10T09:28:24.000Z">
-<meta property="article:modified_time" content="2026-01-10T13:55:35.065Z">
+<meta property="article:modified_time" content="2026-01-20T05:00:06.975Z">
 <meta property="article:author" content="Lingkai Shi">
-<meta property="article:tag" content="操作系统">
 <meta property="article:tag" content="八股文">
+<meta property="article:tag" content="操作系统">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://cdn.hswstatic.com/gif/computer-operating-sytem.jpg">
   
@@ -230,7 +230,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          764 字
+          872 字
         
       </span>
     
@@ -241,7 +241,7 @@
         
         
         
-          7 分钟
+          8 分钟
         
       </span>
     
@@ -283,7 +283,18 @@
             
               <div class="markdown-body">
                 
-                <img src="/2026/01/10/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%94%E7%AB%A0%EF%BC%9A%E7%A3%81%E7%9B%98%E4%B8%8E%E8%AE%BE%E5%A4%87%E7%AE%A1%E7%90%86/Pasted%20image%2020260106150811.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260106150811.png">
+                <h1 id="学完本章需要回答的几个问题？"><a href="#学完本章需要回答的几个问题？" class="headerlink" title="学完本章需要回答的几个问题？"></a>学完本章需要回答的几个问题？</h1><ul>
+<li>IO控制器主要功能、组成、两种寄存器编址方式</li>
+<li>IO控制方式</li>
+<li>IO软件层次结构、输入输出应用程序接口、阻塞IO&#x2F;非阻塞IO</li>
+<li>IO核心子系统</li>
+<li>假脱机技术</li>
+<li>设备的分配与回收</li>
+<li>缓冲区管理</li>
+<li>磁盘结构、调度算法、减少磁盘延迟方法</li>
+<li>磁盘管理、固态硬盘SSD</li>
+</ul>
+<img src="/2026/01/10/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%94%E7%AB%A0%EF%BC%9A%E7%A3%81%E7%9B%98%E4%B8%8E%E8%AE%BE%E5%A4%87%E7%AE%A1%E7%90%86/Pasted%20image%2020260106150811.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260106150811.png">
 
 <h2 id="IO控制器"><a href="#IO控制器" class="headerlink" title="IO控制器"></a>IO控制器</h2><img src="/2026/01/10/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%94%E7%AB%A0%EF%BC%9A%E7%A3%81%E7%9B%98%E4%B8%8E%E8%AE%BE%E5%A4%87%E7%AE%A1%E7%90%86/Pasted%20image%2020260106154000.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260106154000.png">
 <img src="/2026/01/10/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%94%E7%AB%A0%EF%BC%9A%E7%A3%81%E7%9B%98%E4%B8%8E%E8%AE%BE%E5%A4%87%E7%AE%A1%E7%90%86/Pasted%20image%2020260106154020.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20260106154020.png">
@@ -426,9 +437,9 @@
     <div class="post-meta">
       <i class="iconfont icon-tags"></i>
       
-        <a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" class="print-no-link">#操作系统</a>
-      
         <a href="/tags/%E5%85%AB%E8%82%A1%E6%96%87/" class="print-no-link">#八股文</a>
+      
+        <a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" class="print-no-link">#操作系统</a>
       
     </div>
   
