@@ -19,16 +19,16 @@
   <meta name="author" content="Lingkai Shi">
   <meta name="keywords" content="">
   
-    <meta name="description" content="本章导览 IP数据报组成 传统IP地址分类、子网划分技术（定长&#x2F;变长）、CIDR、路由聚合、NAT转换、IP数据报流转过程分析 ARP、DHCP、ICMP IPv6、路由算法、自治系统  正文 MTU 限制的是 IP 数据报的大小（不含链路层头部）  路由器与路由器之间如果使用的是“二层透明传输”方式（如 PPP、HDLC、Frame Relay、MPLS、隧道等），链路本身不需要跑 I">
+    <meta name="description" content="本章导览 IP数据报组成、MTU 传统IP地址分类、一些特殊用的ip地址、子网划分技术（定长&#x2F;变长）、CIDR、路由聚合、NAT转换、IP数据报流转过程分析 不同子网的子网掩码是一样的？ ARP、DHCP、ICMP IPv6、路由算法、自治系统  正文 MTU 限制的是 IP 数据报的大小（不含链路层头部）  路由器与路由器之间如果使用的是“二层透明传输”方式（如 PPP、HDLC、Fr">
 <meta property="og:type" content="article">
 <meta property="og:title" content="计网第四章：《网络层》">
 <meta property="og:url" content="http://example.com/2025/11/22/%E8%AE%A1%E7%BD%91%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E3%80%8A%E7%BD%91%E7%BB%9C%E5%B1%82%E3%80%8B/index.html">
 <meta property="og:site_name" content="码上自由的博客">
-<meta property="og:description" content="本章导览 IP数据报组成 传统IP地址分类、子网划分技术（定长&#x2F;变长）、CIDR、路由聚合、NAT转换、IP数据报流转过程分析 ARP、DHCP、ICMP IPv6、路由算法、自治系统  正文 MTU 限制的是 IP 数据报的大小（不含链路层头部）  路由器与路由器之间如果使用的是“二层透明传输”方式（如 PPP、HDLC、Frame Relay、MPLS、隧道等），链路本身不需要跑 I">
+<meta property="og:description" content="本章导览 IP数据报组成、MTU 传统IP地址分类、一些特殊用的ip地址、子网划分技术（定长&#x2F;变长）、CIDR、路由聚合、NAT转换、IP数据报流转过程分析 不同子网的子网掩码是一样的？ ARP、DHCP、ICMP IPv6、路由算法、自治系统  正文 MTU 限制的是 IP 数据报的大小（不含链路层头部）  路由器与路由器之间如果使用的是“二层透明传输”方式（如 PPP、HDLC、Fr">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://copyright.bdstatic.com/vcg/creative/5592a5af1d0237c50b20be5b98d81743.jpg@h_1280">
 <meta property="article:published_time" content="2025-11-22T12:25:25.000Z">
-<meta property="article:modified_time" content="2025-12-06T06:14:16.688Z">
+<meta property="article:modified_time" content="2026-03-04T07:02:41.588Z">
 <meta property="article:author" content="Lingkai Shi">
 <meta property="article:tag" content="八股文">
 <meta property="article:tag" content="计算机网络">
@@ -232,7 +232,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          284 字
+          308 字
         
       </span>
     
@@ -286,8 +286,9 @@
               <div class="markdown-body">
                 
                 <h1 id="本章导览"><a href="#本章导览" class="headerlink" title="本章导览"></a>本章导览</h1><ul>
-<li>IP数据报组成</li>
-<li>传统IP地址分类、子网划分技术（定长&#x2F;变长）、CIDR、路由聚合、NAT转换、IP数据报流转过程分析</li>
+<li>IP数据报组成、MTU</li>
+<li>传统IP地址分类、一些特殊用的ip地址、子网划分技术（定长&#x2F;变长）、CIDR、路由聚合、NAT转换、IP数据报流转过程分析</li>
+<li>不同子网的子网掩码是一样的？</li>
 <li>ARP、DHCP、ICMP</li>
 <li>IPv6、路由算法、自治系统</li>
 </ul>

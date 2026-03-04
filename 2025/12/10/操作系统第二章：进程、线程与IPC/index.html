@@ -19,16 +19,16 @@
   <meta name="author" content="Lingkai Shi">
   <meta name="keywords" content="">
   
-    <meta name="description" content="学完本章需要回答的问题？ 程序是如何执行的？ 进程状态转换？ 如何实现原语的原子性？进程控制相关的原语？ 进程通信IPC的三种方式？ 信号作用、发送、保存、处理时机、如何处理、特点？ 引入线程机制后，在资源分配、调度、并发行、系统开销方面有什么变化？ 多线程模型？  进程的概念、组成、转换   进程转换 原子性是防止操作系统管理混乱        进程通信IPC 三大类：共享存储（低级、高级）、消">
+    <meta name="description" content="学完本章需要回答的问题？ 程序是如何执行的？ 进程状态转换？ 如何实现原语的原子性？进程控制相关的原语？ 进程通信IPC的三种方式？ 信号作用、发送、保存、处理时机、如何处理、特点？ 引入线程机制后，在资源分配、调度、并发行、系统开销方面有什么变化？ 多线程模型？  进程的概念、组成、转换   主要看是不是缺资源，缺资源的话就得转化成阻塞态。转化成阻塞态的过程也可以是强制的（缺页中断）   进程转">
 <meta property="og:type" content="article">
 <meta property="og:title" content="操作系统第二章：进程、线程与IPC">
 <meta property="og:url" content="http://example.com/2025/12/10/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%8C%E7%AB%A0%EF%BC%9A%E8%BF%9B%E7%A8%8B%E3%80%81%E7%BA%BF%E7%A8%8B%E4%B8%8EIPC/index.html">
 <meta property="og:site_name" content="码上自由的博客">
-<meta property="og:description" content="学完本章需要回答的问题？ 程序是如何执行的？ 进程状态转换？ 如何实现原语的原子性？进程控制相关的原语？ 进程通信IPC的三种方式？ 信号作用、发送、保存、处理时机、如何处理、特点？ 引入线程机制后，在资源分配、调度、并发行、系统开销方面有什么变化？ 多线程模型？  进程的概念、组成、转换   进程转换 原子性是防止操作系统管理混乱        进程通信IPC 三大类：共享存储（低级、高级）、消">
+<meta property="og:description" content="学完本章需要回答的问题？ 程序是如何执行的？ 进程状态转换？ 如何实现原语的原子性？进程控制相关的原语？ 进程通信IPC的三种方式？ 信号作用、发送、保存、处理时机、如何处理、特点？ 引入线程机制后，在资源分配、调度、并发行、系统开销方面有什么变化？ 多线程模型？  进程的概念、组成、转换   主要看是不是缺资源，缺资源的话就得转化成阻塞态。转化成阻塞态的过程也可以是强制的（缺页中断）   进程转">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://cdn.hswstatic.com/gif/computer-operating-sytem.jpg">
 <meta property="article:published_time" content="2025-12-10T01:47:01.000Z">
-<meta property="article:modified_time" content="2026-01-12T03:22:13.026Z">
+<meta property="article:modified_time" content="2026-02-28T03:01:12.370Z">
 <meta property="article:author" content="Lingkai Shi">
 <meta property="article:tag" content="操作系统">
 <meta property="article:tag" content="八股文">
@@ -230,7 +230,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          1.4k 字
+          2.2k 字
         
       </span>
     
@@ -241,7 +241,7 @@
         
         
         
-          12 分钟
+          19 分钟
         
       </span>
     
@@ -292,8 +292,11 @@
 <li>引入线程机制后，在资源分配、调度、并发行、系统开销方面有什么变化？</li>
 <li>多线程模型？</li>
 </ul>
-<h2 id="进程的概念、组成、转换"><a href="#进程的概念、组成、转换" class="headerlink" title="进程的概念、组成、转换"></a>进程的概念、组成、转换</h2><img src="/2025/12/10/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%8C%E7%AB%A0%EF%BC%9A%E8%BF%9B%E7%A8%8B%E3%80%81%E7%BA%BF%E7%A8%8B%E4%B8%8EIPC/Pasted%20image%2020251201110143.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251201110143.png"><img src="/2025/12/10/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%8C%E7%AB%A0%EF%BC%9A%E8%BF%9B%E7%A8%8B%E3%80%81%E7%BA%BF%E7%A8%8B%E4%B8%8EIPC/Pasted%20image%2020251201110041.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251201110041.png">
-<img src="/2025/12/10/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%8C%E7%AB%A0%EF%BC%9A%E8%BF%9B%E7%A8%8B%E3%80%81%E7%BA%BF%E7%A8%8B%E4%B8%8EIPC/Pasted%20image%2020251201211638.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251201211638.png"><img src="/2025/12/10/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%8C%E7%AB%A0%EF%BC%9A%E8%BF%9B%E7%A8%8B%E3%80%81%E7%BA%BF%E7%A8%8B%E4%B8%8EIPC/Pasted%20image%2020251201211617.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251201211617.png">
+<h2 id="进程的概念、组成、转换"><a href="#进程的概念、组成、转换" class="headerlink" title="进程的概念、组成、转换"></a>进程的概念、组成、转换</h2><img src="/2025/12/10/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%8C%E7%AB%A0%EF%BC%9A%E8%BF%9B%E7%A8%8B%E3%80%81%E7%BA%BF%E7%A8%8B%E4%B8%8EIPC/Pasted%20image%2020251201110143.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251201110143.png">
+<img src="/2025/12/10/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%8C%E7%AB%A0%EF%BC%9A%E8%BF%9B%E7%A8%8B%E3%80%81%E7%BA%BF%E7%A8%8B%E4%B8%8EIPC/Pasted%20image%2020251201110041.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251201110041.png">
+<img src="/2025/12/10/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%8C%E7%AB%A0%EF%BC%9A%E8%BF%9B%E7%A8%8B%E3%80%81%E7%BA%BF%E7%A8%8B%E4%B8%8EIPC/Pasted%20image%2020251201211638.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251201211638.png">
+<p>主要看是不是缺资源，缺资源的话就得转化成阻塞态。转化成阻塞态的过程也可以是强制的（缺页中断）</p>
+<img src="/2025/12/10/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%8C%E7%AB%A0%EF%BC%9A%E8%BF%9B%E7%A8%8B%E3%80%81%E7%BA%BF%E7%A8%8B%E4%B8%8EIPC/Pasted%20image%2020251201211617.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251201211617.png">
 
 <h2 id="进程转换"><a href="#进程转换" class="headerlink" title="进程转换"></a>进程转换</h2><img src="/2025/12/10/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%8C%E7%AB%A0%EF%BC%9A%E8%BF%9B%E7%A8%8B%E3%80%81%E7%BA%BF%E7%A8%8B%E4%B8%8EIPC/Pasted%20image%2020251202103129.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251202103129.png">
 <p>原子性是防止操作系统管理混乱</p>
@@ -307,7 +310,52 @@
 <h2 id="进程通信IPC"><a href="#进程通信IPC" class="headerlink" title="进程通信IPC"></a>进程通信IPC</h2><img src="/2025/12/10/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%8C%E7%AB%A0%EF%BC%9A%E8%BF%9B%E7%A8%8B%E3%80%81%E7%BA%BF%E7%A8%8B%E4%B8%8EIPC/Pasted%20image%2020251202172901.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251202172901.png">
 <p>三大类：共享存储（低级、高级）、消息传递（直接、间接）、管道通信<br><strong>共享存储</strong>：基于存储区的共享开辟了一片共享存储空间，并映射到各自进程的虚拟地址空间，访问比较自由，位置随意。互斥访问：P&#x2F;V，可多个读，不可多个同时写；基于数据结构的共享，例如开辟了一个int a[10]。<br>消息传递：<img src="/2025/12/10/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%8C%E7%AB%A0%EF%BC%9A%E8%BF%9B%E7%A8%8B%E3%80%81%E7%BA%BF%E7%A8%8B%E4%B8%8EIPC/Pasted%20image%2020251202192441.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251202192441.png"><br>进程控制块（PCB）和大多数核心的操作系统数据结构，都存放在操作系统内核地址空间中<img src="/2025/12/10/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%8C%E7%AB%A0%EF%BC%9A%E8%BF%9B%E7%A8%8B%E3%80%81%E7%BA%BF%E7%A8%8B%E4%B8%8EIPC/Pasted%20image%2020251202192508.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251202192508.png"><br><strong>间接通信</strong>怎么实现A到B发消息？创建一个专属于B监听的信箱即可<br><strong>管道通信</strong>：内存缓冲区，与共享存储的区别在于，它是循环队列FIFO，必须按顺序来。互斥访问，同时写引发挂起。读后数据就没了。读空和写空都阻塞。</p>
 <h2 id="信号（IPC的另一种形式）"><a href="#信号（IPC的另一种形式）" class="headerlink" title="信号（IPC的另一种形式）"></a>信号（IPC的另一种形式）</h2><img src="/2025/12/10/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%8C%E7%AB%A0%EF%BC%9A%E8%BF%9B%E7%A8%8B%E3%80%81%E7%BA%BF%E7%A8%8B%E4%B8%8EIPC/Pasted%20image%2020251202210141.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251202210141.png"><img src="/2025/12/10/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%8C%E7%AB%A0%EF%BC%9A%E8%BF%9B%E7%A8%8B%E3%80%81%E7%BA%BF%E7%A8%8B%E4%B8%8EIPC/Pasted%20image%2020251202210346.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251202210346.png">
-<p>信号本质上是硬件中断的一种软件模拟，用于通知进程发生了某个事件。<br>信号的生命周期分为三个阶段：发送 -&gt; 注册（挂起） -&gt; 处理。</p>
+<p>信号本质上是硬件中断的一种软件模拟，用于通知进程发生了某个事件。<br>硬件中断针对CPU，软中断针对进程。</p>
+<table>
+<thead>
+<tr>
+<th>对比维度</th>
+<th>⚡ 硬件中断 (原版)</th>
+<th>✉️ 信号&#x2F;软中断 (软件模拟版)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>打断的对象</strong></td>
+<td><strong>CPU 硬件</strong></td>
+<td><strong>普通用户进程</strong></td>
+</tr>
+<tr>
+<td><strong>谁发出的？</strong></td>
+<td>外部物理设备 (键盘、网卡、时钟)</td>
+<td>操作系统内核、其他进程 (如 <code>kill</code> 命令)</td>
+</tr>
+<tr>
+<td><strong>通知的方式</strong></td>
+<td>给 CPU 引脚发一个高低电平信号</td>
+<td>在进程的 <code>PCB</code> (进程控制块) 里把某一位标记为 1</td>
+</tr>
+<tr>
+<td><strong>何时触发？</strong></td>
+<td><strong>随时</strong> (电平一到，CPU 下一条指令立刻执行)</td>
+<td><strong>随时</strong> (只要进程被调度到，准备从内核态返回用户态时)</td>
+</tr>
+<tr>
+<td><strong>去哪里查表？</strong></td>
+<td>查<strong>中断向量表 (IDT)</strong>，这表是系统全局的</td>
+<td>查<strong>信号处理表</strong>，这表是每个进程私有的</td>
+</tr>
+<tr>
+<td><strong>谁来处理？</strong></td>
+<td>内核的 <strong>中断服务程序 (ISR)</strong></td>
+<td>开发者自己写的 <strong>信号处理函数 (Signal Handler)</strong></td>
+</tr>
+<tr>
+<td><strong>处理完怎么办？</strong></td>
+<td>执行 <code>iret</code> 硬件指令，恢复现场，回到被打断的程序</td>
+<td>执行 <code>sigreturn</code> 系统调用，恢复现场，回到被打断的代码行</td>
+</tr>
+</tbody></table>
+<p>信号的生命周期分为三个阶段：发送 -&gt; 注册（挂起） -&gt; 处理。<br>“软件模拟”的过程，我们想象一个场景：你写了一个死循环的 Python 脚本一直在跑，然后你在终端按下了 Ctrl+C（触发 SIGINT 信号）。<br>在这个瞬间，操作系统是如何模拟硬件中断，强行改变你 Python 脚本的执行流的？<br>“挂号” (注册信号)：<br>当你按下 Ctrl+C，键盘触发硬件中断。内核醒来，发现你要终止某个 Python 进程。内核并不会直接杀掉它，而是悄悄跑到这个 Python 进程的“档案袋”（PCB）里，把写着 SIGINT 的那个格子画个勾（挂起信号）。<br>“强制拦截” (拦截执行流)：<br>内核处理完别的事情，准备把 CPU 还给你的 Python 进程（从内核态退回用户态）时，内核会习惯性地看一眼档案袋：“哟，你头上有个 SIGINT 信号待处理。”<br>“偷梁换柱” (强行塞入处理函数)：<br>最精彩的“变魔术”来了！内核不会让你的 Python 进程回到刚才死循环的那行代码。相反，内核会强行修改你进程的执行指针（PC寄存器），把它指向 Python 解释器里预设好的“信号处理函数”（比如抛出 KeyboardInterrupt 异常的代码）。<br>“恢复原状” (如果你没被杀死)：<br>假设你捕获了这个异常并且没有退出。当信号处理函数执行完后，会触发一个特殊的系统调用（sigreturn），内核再次介入，把你当初真正断开的那行代码的地址塞回寄存器，你的脚本继续往下跑。<br>你看，对于你的 Python 进程来说，它是不是感觉自己就像 CPU 一样，正好好跑着代码，突然被一种“神秘的外部力量”强行打断，逼着去执行了一段处理程序，然后再回来？ 这就是为什么叫它“软件模拟”。</p>
 <h2 id="线程"><a href="#线程" class="headerlink" title="线程"></a>线程</h2><img src="/2025/12/10/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%8C%E7%AB%A0%EF%BC%9A%E8%BF%9B%E7%A8%8B%E3%80%81%E7%BA%BF%E7%A8%8B%E4%B8%8EIPC/Pasted%20image%2020251202211612.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251202211612.png">
 <img src="/2025/12/10/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%BA%8C%E7%AB%A0%EF%BC%9A%E8%BF%9B%E7%A8%8B%E3%80%81%E7%BA%BF%E7%A8%8B%E4%B8%8EIPC/Pasted%20image%2020251202211626.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251202211626.png">
 <p>注意，同一进程内的不同线程间共享进程的系统资源</p>

@@ -19,16 +19,16 @@
   <meta name="author" content="Lingkai Shi">
   <meta name="keywords" content="">
   
-    <meta name="description" content="学完本章需要回答的几个问题 内存按字节&#x2F;字编址，地址和实际存储的区别？ 从写程序到运行的过程？链接的三种方式、装入的三种方式以及区别？ 内存管理：内存空间的分配与回收、扩充、存储保护、地址转换？ 连续分区管理、分页存储管理、分段、段页、快表和多级页表等机制 虚拟内存的实现 内存映射文件  内存 4GB&#x3D;4\*2^30\*Byte，即总共2的32次方个二进制位，就需要32位进行编址。 感到">
+    <meta name="description" content="学完本章需要回答的几个问题 内存按字节&#x2F;字编址，地址和实际存储的区别？ 从写程序到运行的过程？链接的三种方式、装入的三种方式以及区别？ 进程的内存映射 内存管理：内存空间的分配与回收、扩充、存储保护、地址转换？ 连续分区管理、分页存储管理、分段、段页、快表和多级页表等机制 虚拟内存的实现 内存映射文件  内存 4GB&#x3D;4\*2^30\*Byte，即总共2的32次方个二进制位，就需要32位">
 <meta property="og:type" content="article">
 <meta property="og:title" content="操作系统第三章：内存">
 <meta property="og:url" content="http://example.com/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/index.html">
 <meta property="og:site_name" content="码上自由的博客">
-<meta property="og:description" content="学完本章需要回答的几个问题 内存按字节&#x2F;字编址，地址和实际存储的区别？ 从写程序到运行的过程？链接的三种方式、装入的三种方式以及区别？ 内存管理：内存空间的分配与回收、扩充、存储保护、地址转换？ 连续分区管理、分页存储管理、分段、段页、快表和多级页表等机制 虚拟内存的实现 内存映射文件  内存 4GB&#x3D;4\*2^30\*Byte，即总共2的32次方个二进制位，就需要32位进行编址。 感到">
+<meta property="og:description" content="学完本章需要回答的几个问题 内存按字节&#x2F;字编址，地址和实际存储的区别？ 从写程序到运行的过程？链接的三种方式、装入的三种方式以及区别？ 进程的内存映射 内存管理：内存空间的分配与回收、扩充、存储保护、地址转换？ 连续分区管理、分页存储管理、分段、段页、快表和多级页表等机制 虚拟内存的实现 内存映射文件  内存 4GB&#x3D;4\*2^30\*Byte，即总共2的32次方个二进制位，就需要32位">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://cdn.hswstatic.com/gif/computer-operating-sytem.jpg">
 <meta property="article:published_time" content="2025-12-31T07:11:00.000Z">
-<meta property="article:modified_time" content="2026-01-17T06:05:03.678Z">
+<meta property="article:modified_time" content="2026-03-03T01:55:39.607Z">
 <meta property="article:author" content="Lingkai Shi">
 <meta property="article:tag" content="操作系统">
 <meta property="article:tag" content="八股文">
@@ -230,7 +230,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          825 字
+          871 字
         
       </span>
     
@@ -241,7 +241,7 @@
         
         
         
-          7 分钟
+          8 分钟
         
       </span>
     
@@ -286,6 +286,7 @@
                 <h1 id="学完本章需要回答的几个问题"><a href="#学完本章需要回答的几个问题" class="headerlink" title="学完本章需要回答的几个问题"></a>学完本章需要回答的几个问题</h1><ul>
 <li>内存按字节&#x2F;字编址，地址和实际存储的区别？</li>
 <li>从写程序到运行的过程？链接的三种方式、装入的三种方式以及区别？</li>
+<li>进程的内存映射</li>
 <li>内存管理：内存空间的分配与回收、扩充、存储保护、地址转换？</li>
 <li>连续分区管理、分页存储管理、分段、段页、快表和多级页表等机制</li>
 <li>虚拟内存的实现</li>
@@ -302,7 +303,7 @@
 <h2 id="内存管理"><a href="#内存管理" class="headerlink" title="内存管理"></a>内存管理</h2><img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251213123951.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251213123951.png">
 <p>界地址寄存器判断逻辑地址；重定位寄存器判断实际物理地址</p>
 <img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251214160134.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251214160134.png">
-<p>32位是指计算机用32二进制位编址，宏直接将值替换为指令</p>
+<p>32位是指计算机用32二进制位编址，宏直接将值替换为指令<br>操作系统：空头支票（每个进程给一个如图所示的虚拟内存拉满），借尸还魂（Swap）</p>
 <h3 id="内存空间的扩充"><a href="#内存空间的扩充" class="headerlink" title="内存空间的扩充"></a>内存空间的扩充</h3><p>ps，还有虚拟存储技术，在后文</p>
 <img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251214162046.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251214162046.png">
 <img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251214162146.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251214162146.png">
@@ -344,7 +345,7 @@
 <img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251226152236.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251226152236.png">
 <img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251226152310.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251226152310.png">
 <img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251226152330.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251226152330.png">
-
+<p>注意为什么按10切分？</p>
 <h3 id="基本分段存储管理"><a href="#基本分段存储管理" class="headerlink" title="基本分段存储管理"></a>基本分段存储管理</h3><img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251226160935.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251226160935.png">
 <img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251226152821.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251226152821.png">
 <img src="/2025/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E5%86%85%E5%AD%98/Pasted%20image%2020251226161035.png" srcset="/img/loading.gif" lazyload class="" title="Pasted image 20251226161035.png">
