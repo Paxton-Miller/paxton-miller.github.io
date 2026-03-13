@@ -28,7 +28,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://beconnected.esafety.gov.au/pluginfile.php/97531/mod_resource/content/2/t1_c5_a2_p1.svg">
 <meta property="article:published_time" content="2026-03-13T06:15:10.000Z">
-<meta property="article:modified_time" content="2026-03-13T06:16:58.084Z">
+<meta property="article:modified_time" content="2026-03-13T13:57:04.138Z">
 <meta property="article:author" content="Lingkai Shi">
 <meta property="article:tag" content="计算机网络">
 <meta property="article:tag" content="Web前端">
@@ -231,7 +231,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          22k 字
+          23k 字
         
       </span>
     
@@ -242,7 +242,7 @@
         
         
         
-          186 分钟
+          188 分钟
         
       </span>
     
@@ -306,24 +306,27 @@
 </tbody></table>
 <h4 id="二、-浏览器的五大主要进程"><a href="#二、-浏览器的五大主要进程" class="headerlink" title="二、 浏览器的五大主要进程"></a>二、 浏览器的五大主要进程</h4><p>浏览器是一个庞大的协作系统，主要由以下进程各司其职：</p>
 <ul>
-<li><p><strong>浏览器主进程 (1个)</strong>：总控大脑。负责页面管理（创建&#x2F;销毁）、网络资源管理、下载、本地存储等。</p>
-</li>
-<li><p><strong>浏览器渲染进程 (多个)</strong>：即<strong>浏览器内核</strong>，通常每个 Tab 页一个。核心任务是解析 HTML&#x2F;CSS&#x2F;JS 并渲染页面。<strong>出于安全考虑，运行在沙箱模式下。</strong></p>
-</li>
-<li><p><strong>GPU 进程 (最多1个)</strong>：负责 3D 绘制和页面的硬件加速渲染。</p>
-</li>
-<li><p><strong>网络进程</strong>：独立处理页面的网络资源加载。</p>
-</li>
-<li><p><strong>第三方插件进程 (多个)</strong>：按需创建，隔离 Flash 等插件，防止其崩溃影响主程序。</p>
+<li><strong>浏览器主进程 (1个)</strong>：总控大脑。负责页面管理（创建&#x2F;销毁）、网络资源管理、下载、本地存储等。</li>
+<li><strong>浏览器渲染进程 (多个)</strong>：即<strong>浏览器内核</strong>，通常每个 Tab 页一个。核心任务是解析 HTML&#x2F;CSS&#x2F;JS 并渲染页面。<strong>出于安全考虑，运行在沙箱模式下。</strong></li>
+<li><strong>GPU 进程 (最多1个)</strong>：负责 3D 绘制和页面的硬件加速渲染。</li>
+<li><strong>网络进程</strong>：独立处理页面的网络资源加载。</li>
+<li><strong>第三方插件进程 (多个)</strong>：按需创建，隔离 Flash 等插件，防止其崩溃影响主程序。<blockquote>
+<p>Google Chrome的task manager可以查看</p>
+</blockquote>
 </li>
 </ul>
 <h4 id="三、-渲染进程（浏览器内核）的内部线程"><a href="#三、-渲染进程（浏览器内核）的内部线程" class="headerlink" title="三、 渲染进程（浏览器内核）的内部线程"></a>三、 渲染进程（浏览器内核）的内部线程</h4><p>渲染进程是我们前端开发者最关心的部分，它内部是<strong>多线程</strong>协作的：</p>
+<ol>
+<li><strong>Main Thread（主线程）</strong>：绝对的核心。它集大权于一身，既跑 V8 引擎执行 JS，又跑 Blink 引擎解析 HTML&#x2F;CSS、构建 DOM 树、计算布局（Layout）、事件触发等。</li>
+<li><strong>Compositor Thread（合成器线程）</strong>：主线程的“高级副手”。主线程把页面计算好之后，交给它。它负责把页面分层（Layer），并且<strong>独立接管页面的滚动（Scroll）和某些 CSS 动画（如 <code>transform</code> 和 <code>opacity</code>）</strong>。即使主线程被卡死，它也能让页面继续顺滑滚动。</li>
+<li><strong>Raster Threads（光栅化线程池）</strong>：合成器线程手下的“底层画师”。它们通常有多个（线程池），负责把分好层的图块，真正转换成显示器能看懂的像素点矩阵（位图）。</li>
+<li><strong>Worker Threads（工作线程）</strong>：如果你在前端代码里主动创建了 Web Worker 或 Service Worker，它们就会在这里独立运行，专门帮你做那些极其耗时的 JS 数学计算，绝不抢占主线程。</li>
+</ol>
 <ul>
-<li><strong>GUI 渲染线程</strong>：负责解析 HTML&#x2F;CSS、构建 DOM 树和渲染树，处理页面的重绘 (Repaint) 和回流 (Reflow)。<strong>⚠️ 与 JS 引擎线程互斥。</strong></li>
-<li><strong>JS 引擎线程 (如 V8)</strong>：单线程解析和执行 JavaScript。因为与 GUI 线程互斥，如果 JS 执行过久，会“冻结”页面渲染导致卡顿。</li>
-<li><strong>事件触发线程</strong>：事件大管家。负责维护“任务队列”，当遇到点击、AJAX 回调、定时器到期等事件时，会将它们排入队列队尾，等待 JS 引擎空闲时处理。</li>
-<li><strong>定时触发线程</strong>：负责 <code>setTimeout</code> 和 <code>setInterval</code> 的独立计时。因为 JS 是单线程且可能被阻塞，由独立线程计时能保证相对准确。计时完毕后，通知“事件触发线程”将回调放入任务队列。</li>
-<li><strong>异步 HTTP 请求线程</strong>：遇到 XHR&#x2F;Fetch 时开辟的独立线程。等待网络状态变更且有回调函数时，将其放入任务队列。</li>
+<li>GUI由主线程、合成器线程负责；异步请求由网络进程负责；定时触发由底层的 C++ 定时器机制<blockquote>
+<p>Google Chrome的Performance可以查看</p>
+</blockquote>
+</li>
 </ul>
 <h4 id="四、-异步运行机制与内核拓展"><a href="#四、-异步运行机制与内核拓展" class="headerlink" title="四、 异步运行机制与内核拓展"></a>四、 异步运行机制与内核拓展</h4><ul>
 <li><strong>异步运行逻辑 (Event Loop 原理)</strong>：JS 引擎执行栈空闲时 → 检查并读取任务队列 → 执行队列中的回调任务。这会导致一个问题：如果主线程一直忙碌，<strong>定时器任务可能不会按时执行</strong>。</li>
@@ -511,7 +514,7 @@
 <li><strong>Webkit 内核</strong>：Safari、Chrome 等</li>
 </ul>
 <h3 id="浏览器同源策略"><a href="#浏览器同源策略" class="headerlink" title="浏览器同源策略"></a>浏览器同源策略</h3><h4 id="跨域"><a href="#跨域" class="headerlink" title="跨域"></a>跨域</h4><ul>
-<li><strong>同源策略定义</strong>：当且仅当<strong>协议、域名和端口</strong>全部相同时才属于“同源”。非同源的 JS 脚本在未经允许时，无法访问对方域下的内容。</li>
+<li><strong>同源策略定义</strong>：当且仅当<strong>协议、域名和端口</strong>全部相同时才属于“同源”。非同源的 JS 脚本在未经允许时，无法访问对方域下的内容。注意和同站Same-site的区别</li>
 <li><strong>跨域的本质机制</strong>：<ul>
 <li>跨域请求<strong>一定会被服务端真实执行</strong>。因为 HTTP 请求头可以被篡改，服务端无法仅凭请求头准确判断是否跨域并进行拦截。</li>
 <li>跨域报错实际上是<strong>浏览器的保护机制</strong>。请求发出并执行后，在数据返回时，浏览器发现跨域限制，从而拦截并隐藏了返回值。</li>
@@ -684,7 +687,7 @@
 <tr>
 <td><strong>Nginx职责 (静态文件)</strong></td>
 <td><strong>绝对主力</strong>。<br><br>  <br><br>专门给打包带 Hash 的静态资源 (JS&#x2F;CSS&#x2F;图片) 设置 <code>max-age=1年</code>。</td>
-<td><strong>绝对主力</strong>。<br><br>  <br><br>专门给单页应用的入口 <code>index.html</code> 设置 <code>no-cache</code>。Nginx 底层全自动比对 ETag。</td>
+<td><strong>绝对主力</strong>。<br><br><br><br>专门给单页应用的入口 <code>index.html</code> 设置 <code>no-cache</code>。Nginx 底层全自动比对 ETag。</td>
 <td>一般只负责做反向代理&#x2F;负载均衡，把 API 请求直接透传给后端服务器。</td>
 </tr>
 <tr>
@@ -697,9 +700,18 @@
 <td><strong>生产环境主流做法</strong></td>
 <td>**带 Hash 的文件无脑强缓存。**内容一变，文件名必变，天然避开缓存更新痛点。</td>
 <td>**名字不变的文件 (如 <code>index.html</code>) 无脑协商缓存。**保证用户永远能拉到最新版本的壳子。</td>
-<td><strong>极少用 HTTP 协商缓存！</strong>(因为省带宽但不省数据库性能)。<br><br>  <br><br>👉 <strong>生产方案</strong>：前端发正常请求，后端在服务器内使用 <strong>Redis 等内存数据库</strong>做业务层缓存，扛住高并发。</td>
+<td><strong>极少用 HTTP 协商缓存！</strong>(因为省带宽但不省数据库性能)。  <br><br>👉 <strong>生产方案</strong>：前端发正常请求，后端在服务器内使用 <strong>Redis 等内存数据库</strong>做业务层缓存，扛住高并发。</td>
+</tr>
+<tr>
+<td>例如：</td>
+<td></td>
+<td></td>
+<td></td>
 </tr>
 </tbody></table>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><code class="hljs nginx"><span class="hljs-section">server</span> &#123;<br>    <span class="hljs-attribute">listen</span>       <span class="hljs-number">80</span>;<br>    <span class="hljs-attribute">server_name</span>  yourdomain.com;<br>    <span class="hljs-attribute">root</span>         /usr/share/nginx/html; <span class="hljs-comment"># 你的前端 dist 目录</span><br>    <br>    <span class="hljs-comment"># 开启 ETag (协商缓存的基石)</span><br>    <span class="hljs-attribute">etag</span> <span class="hljs-literal">on</span>;<br><br>    <span class="hljs-comment"># 1. 核心大门：index.html </span><br>    <span class="hljs-comment"># 策略：不走强缓存，每次都必须向服务器确认有没有发新版（走协商缓存或直接拉新）</span><br>    <span class="hljs-section">location</span> = /index.html &#123;<br>        <span class="hljs-comment"># no-cache 的意思不是“不缓存”，而是“必须先跟服务器确认 (协商) 后才能使用缓存”</span><br>        <span class="hljs-attribute">add_header</span> Cache-Control <span class="hljs-string">&quot;no-cache, no-store, must-revalidate&quot;</span>;<br>        <span class="hljs-comment"># 顺手解决 SPA 路由刷新的 404 问题</span><br>        <span class="hljs-attribute">try_files</span> <span class="hljs-variable">$uri</span> <span class="hljs-variable">$uri</span>/ /index.html; <br>    &#125;<br><br>    <span class="hljs-comment"># 2. 静态资产：带 Hash 值的 JS / CSS 文件</span><br>    <span class="hljs-comment"># 策略：霸道总裁模式，强缓存直接拉满 1 年！</span><br>    <span class="hljs-section">location</span> <span class="hljs-regexp">~* \.(js|css)$</span> &#123;<br>        <span class="hljs-comment"># max-age=31536000 (365天的秒数)</span><br>        <span class="hljs-comment"># immutable (告诉浏览器这个文件绝对不会变，连刷新的验证都省了)</span><br>        <span class="hljs-attribute">add_header</span> Cache-Control <span class="hljs-string">&quot;public, max-age=31536000, immutable&quot;</span>;<br>    &#125;<br><br>    <span class="hljs-comment"># 3. 媒体资源：图片、字体等</span><br>    <span class="hljs-comment"># 策略：常规强缓存 30 天</span><br>    <span class="hljs-section">location</span> <span class="hljs-regexp">~* \.(png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf)$</span> &#123;<br>        <span class="hljs-attribute">expires</span> <span class="hljs-number">30d</span>;<br>        <span class="hljs-attribute">add_header</span> Cache-Control <span class="hljs-string">&quot;public&quot;</span>;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
 <p>(2). 准备IP地址和端口：进行DNS解析时先查找缓存，没有再使用DNS服务器解析，查找顺序为：</p>
 <ul>
 <li>浏览器缓存；</li>
@@ -746,7 +758,7 @@
 <li><strong>构建 CSSOM 树</strong>：把 CSS 文本解析成样式树，并把属性“标准化”（比如把 <code>em</code> 换算成 <code>px</code>，把单词 <code>red</code> 换算成 <code>rgb</code>）。</li>
 <li><em>⚠️ 优化痛点</em>：JS 和 CSS 的下载与执行会阻塞 DOM 解析，导致“白屏”。所以要做优化（比如压缩文件、给 script 加 <code>async/defer</code>、内联关键 CSS 等）。</li>
 </ul>
-<p><strong>(3). 布局阶段（排版定位）</strong></p>
+<p><strong>(3). 布局阶段（排版定位&#x2F;重排）</strong></p>
 <ul>
 <li><strong>生成布局树 (Layout Tree)</strong>：把 DOM 树和 CSSOM 树合并。**注意：这棵树只包含屏幕上看得见的元素！**像 <code>&lt;head&gt;</code> 标签或者加了 <code>display: none</code> 的元素都会被无情剔除。</li>
 <li><strong>计算位置</strong>：计算每个可见元素在屏幕上的确切宽、高和几何坐标。</li>
@@ -921,6 +933,7 @@
 <h4 id="Memory-Cache"><a href="#Memory-Cache" class="headerlink" title="Memory Cache"></a>Memory Cache</h4><p>内存</p>
 <h4 id="Disk-Cache"><a href="#Disk-Cache" class="headerlink" title="Disk Cache"></a>Disk Cache</h4><p>硬盘</p>
 <h4 id="Push-Cache"><a href="#Push-Cache" class="headerlink" title="Push Cache"></a>Push Cache</h4><p>推送缓存，已废弃</p>
+<p><strong>Service Worker 缓存</strong> → <strong>Memory Cache (内存)</strong> → <strong>Disk Cache (强缓存)</strong> → <strong>网络请求 (协商缓存 304 &#x2F; 真实请求 200)</strong>。</p>
 <h3 id="Cookie"><a href="#Cookie" class="headerlink" title="Cookie"></a>Cookie</h3><h4 id="一、-为什么必须要有-Cookie？（没有它会怎样）"><a href="#一、-为什么必须要有-Cookie？（没有它会怎样）" class="headerlink" title="一、 为什么必须要有 Cookie？（没有它会怎样）"></a>一、 为什么必须要有 Cookie？（没有它会怎样）</h4><p>因为 HTTP 协议是**无状态（Stateless）**的。TCP是有状态的（Stateful）</p>
 <ul>
 <li><strong>没有 Cookie 的世界</strong>：你往购物车里加了一件衣服，跳转到结账页面时，服务器根本不知道你是谁，购物车又空了。你每点一个按钮，都要重新输一遍账号密码。</li>
